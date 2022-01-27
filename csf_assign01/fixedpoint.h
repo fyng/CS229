@@ -5,13 +5,13 @@
 
 typedef struct {
   // TODO: add fields
-  uint64_t whole
-  uint64_t frac
+  uint64_t whole;
+  uint64_t frac;
 
   // tag
-  int state
-
-
+  int state;
+  int is_neg;
+  int is_err;
 } Fixedpoint;
 
 // Create a Fixedpoint value representing an integer.
