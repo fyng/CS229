@@ -5,10 +5,15 @@
 
 typedef struct {
   // TODO: add fields
+  // Note: Perhaps intiailize struct values with 0UL?
   uint64_t whole;
   uint64_t frac;
+  // Note: Hex representations with two strings?
+  // Note: Are we allowed to use <string.h>?
+  char hex_whole[20];
+  char hex_frac[20];
 
-  // tag
+  // tags, may be simpler to have seperate tags for seperate data states
   int state;
   int is_neg;
   int is_err;
