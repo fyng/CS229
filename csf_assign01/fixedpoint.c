@@ -9,6 +9,7 @@
 static Fixedpoint DUMMY;
 
 Fixedpoint fixedpoint_create(uint64_t whole) {
+  // create Fixedpoint variable to return via value
   Fixedpoint fp;
   fp.whole = whole;
   fp.frac = 0UL;
