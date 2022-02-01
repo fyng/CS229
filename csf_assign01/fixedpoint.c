@@ -78,9 +78,13 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
 }
 
 int fixedpoint_is_zero(Fixedpoint val) {
-  if (fixedpoint_is_valid(val) == 0UL) return 0;
+  //if (fixedpoint_is_valid(val) == 0) {
+  //return 0;
+  //}
 
-  if (val.whole == 0UL && val.frac == 0UL) return 1;
+  if (val.whole == 0UL && val.frac == 0UL) {
+    return 1;
+  }
   return 0;
 }
 
