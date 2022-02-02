@@ -24,13 +24,33 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
 }
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
-  // Fixedpoint fp
-  // token = strtok(hex, ".");
-  // if (token != NULL) {
-  // }
-  // fp.whole = strtol(hex, NULL, 16)
-  assert(0);
-  return DUMMY;
+  Fixedpoint fp;
+  // 1. scan for "-", if found, set is_neg to 1
+  if (hex[0] == '-') fp.is_neg = 1;
+
+  // 2. scan for ".". First part is whole, second part is frac
+  char* token;
+
+  // whole
+  token = strtok(hex, ".");
+  if (token == NULL) {
+    fp.is_err = 1;
+    fp.whole = 0;
+    fp.frac = 0;
+    fp.is_err = 1;
+    return fp;
+  } 
+  int whole = atoi(token);
+
+  // is there a fract?
+  int frac = 0;
+  token = strtok(hex, ".");
+  if (token != NULL) frac = atoi(token);
+
+  fp.whole = whole;
+  fp.frac = frac;
+
+  return fp;
 }
 
 uint64_t fixedpoint_whole_part(Fixedpoint val) {
