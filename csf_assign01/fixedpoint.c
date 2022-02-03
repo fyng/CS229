@@ -25,32 +25,38 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
   Fixedpoint fp;
+
+  // "f6a5865.00f2"
+
+  if (hex[0] == NULL || hex[0] == ".") fp.is_err = 1;
   // 1. scan for "-", if found, set is_neg to 1
-  if (hex[0] == '-') fp.is_neg = 1;
-
-  // 2. scan for ".". First part is whole, second part is frac
+  if (hex[0] == '-'){
+    fp.is_neg = 1;
+    if (hex[1] == "0") fp.is_err = 1;
+  }
   char* token;
-
-  // whole
   token = strtok(hex, ".");
+  // hex is just a "-"
   if (token == NULL) {
     fp.is_err = 1;
     fp.whole = 0;
     fp.frac = 0;
-    fp.is_err = 1;
     return fp;
   } 
-  int whole = atoi(token);
+  uint64_t whole = (int)strtol(token, NULL, 16);
+  if (whole = 0) fp.is_err = 1;
 
-  // is there a fract?
-  int frac = 0;
-  token = strtok(hex, ".");
-  if (token != NULL) frac = atoi(token);
-
-  fp.whole = whole;
-  fp.frac = frac;
-
-  return fp;
+  uint64_t frac = 0;
+  token = strtok(NULL, ".");
+  if (token != NULL) {
+    frac = (int)strtol(token, NULL, 16);
+    if (frac == 0) {
+      fp.is_err = 1;
+      fp.whole = 0;
+      fp.frac = 0;
+      return fp;
+    }
+  } 
 }
 
 uint64_t fixedpoint_whole_part(Fixedpoint val) {
@@ -109,15 +115,11 @@ int fixedpoint_is_zero(Fixedpoint val) {
 }
 
 int fixedpoint_is_err(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
-  return 0;
+  return val.is_err;
 }
 
 int fixedpoint_is_neg(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
-  return 0;
+  return val.is_neg;
 }
 
 int fixedpoint_is_overflow_neg(Fixedpoint val) {
