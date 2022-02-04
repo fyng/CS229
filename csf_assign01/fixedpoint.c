@@ -212,7 +212,7 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
     offset++;
   }
   int chars = sprintf(s + offset, "%lx", fixedpoint_whole_part(val));
-  if (chars > 0) offset = offset + chars;
+  offset = offset + chars;
 
   uint64_t frac = fixedpoint_frac_part(val);
   if (frac != 0){
@@ -225,8 +225,13 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
     // }
 
     // CONCEPT 2:
-    // convert to hex string first, then truncate trailing 0s
-    sprintf(s + offset, "%lx", frac);
+    // convert to hex string with left 0 padding. 
+    // Then truncate trailing 0s
+    chars = sprintf(s + offset, "%016lx", frac);
+    while(*(s+offset+chars - 1) == '0') {
+      *(s+offset+chars - 1) = '\0';
+      chars--;
+    }
   }
   return s;
 }
