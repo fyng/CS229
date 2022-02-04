@@ -13,10 +13,9 @@ typedef struct {
   char hex_whole[20];
   char hex_frac[20];
 
-  // tags, may be simpler to have seperate tags for seperate data states
-  int state;
   int is_neg;
   int is_err;
+  int invalid;
 } Fixedpoint;
 
 // Create a Fixedpoint value representing an integer.
