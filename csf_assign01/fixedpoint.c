@@ -13,12 +13,19 @@ Fixedpoint fixedpoint_create(uint64_t whole) {
   Fixedpoint fp;
   fp.whole = whole;
   fp.frac = 0UL;
+<<<<<<< HEAD
   fp.is_neg = 0;
   fp.is_overflow_neg = 0;
   fp.is_overflow.pos = 0;
   fp.is_underflow.pos = 0;
   fp.is_underflow.neg = 0;
   fp.is_valid = 1;
+=======
+
+  fp.is_neg = 0;
+  fp.is_err = 0;
+  fp.invalid = 0;
+>>>>>>> refs/remotes/origin/main
   return fp;
 }
 
@@ -26,12 +33,19 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
   Fixedpoint fp;
   fp.whole = whole;
   fp.frac = frac;
+<<<<<<< HEAD
   fp.is_neg = 0;
   fp.is_overflow_neg = 0;
   fp.is_overflow_pos = 0;
   fp.is_underflow_neg = 0;
   fp.is_underflow_pos = 0;
   fp.is_valid = 1;
+=======
+
+  fp.is_neg = 0;
+  fp.is_err = 0;
+  fp.invalid = 0;
+>>>>>>> refs/remotes/origin/main
   return fp;
 }
 
@@ -67,15 +81,17 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
   //   return fp;
   // }
   
-  whole = strtoul(hex, &hex, 16);
+  whole = strtoull(hex, &hex, 16);
   if (pptr != NULL) {
-    frac = strtoul(pptr+1, &hex, 16);
+    frac = strtoull(pptr+1, &hex, 16);
   }
   
   if (whole == 0UL || frac == 0UL) {
     fp.is_err = 1;
     return fp;
   }
+
+  frac = frac << (64 - (hex - (pptr+1)) * 4 );
 
   if (pptr != NULL) {
     return fixedpoint_create2(whole, frac);
