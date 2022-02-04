@@ -67,9 +67,9 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
   //   return fp;
   // }
   
-  whole = strtoull(hex, &hex, 16);
+  whole = strtoul(hex, &hex, 16);
   if (pptr != NULL) {
-    frac = strtoull(pptr+1, &hex, 16);
+    frac = strtoul(pptr+1, &hex, 16);
   }
   
   if (whole == 0UL || frac == 0UL) {
@@ -128,7 +128,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
     }
     if (sum.frac > left.frac || sum.frac > right.frac) {
       sum.frac = 18446744073709551615 - sum.frac;
-      sume.whole -= 1;
+      sum.whole -= 1;
     }
   }
   return sum;
@@ -220,7 +220,7 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
     offset++;
 
     // FIXME: 
-    while (frac & 32 == 0){
+    while ((frac & 16UL) == 0){
       frac = frac >> 4;
     }
     sprintf(s + offset, "%lx", frac);
