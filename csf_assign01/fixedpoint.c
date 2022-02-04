@@ -15,9 +15,9 @@ Fixedpoint fixedpoint_create(uint64_t whole) {
   fp.frac = 0UL;
   fp.is_neg = 0;
   fp.is_overflow_neg = 0;
-  fp.is_overflow.pos = 0;
-  fp.is_underflow.pos = 0;
-  fp.is_underflow.neg = 0;
+  fp.is_overflow_pos = 0;
+  fp.is_underflow_pos = 0;
+  fp.is_underflow_neg = 0;
   fp.is_valid = 1;
   return fp;
 }
@@ -219,10 +219,13 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
     *(s + offset) = '.';
     offset++;
 
-    // FIXME: 
-    while ((frac & 16UL) == 0){
-      frac = frac >> 4;
-    }
+    // bitwise and with 1111
+    // while ((frac & 15UL) == 0){
+    //   frac = frac >> 4;
+    // }
+
+    // CONCEPT 2:
+    // convert to hex string first, then truncate trailing 0s
     sprintf(s + offset, "%lx", frac);
   }
   return s;
