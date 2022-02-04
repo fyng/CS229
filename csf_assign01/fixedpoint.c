@@ -219,9 +219,25 @@ int fixedpoint_is_valid(Fixedpoint val) {
 }
 
 char *fixedpoint_format_as_hex(Fixedpoint val) {
-  // TODO: implement
-  assert(0);
-  char *s = malloc(20);
-  strcpy(s, "<invalid>");
+  char *s = malloc(35);
+  int offset = 0;
+  if(fixedpoint_is_neg(val)){
+    s[0] = '-';
+    offset++;
+  }
+  int chars = sprintf(s + offset, "%lx", fixedpoint_whole_part(val));
+  if (chars > 0) offset = offset + chars;
+
+  uint64_t frac = fixedpoint_frac_part(val);
+  if (frac != 0){
+    *(s + offset) = '.';
+    offset++;
+
+    // FIXME: 
+    while (frac & 32 == 0){
+      frac = frac >> 4;
+    }
+    sprintf(s + offset, "%lx", frac);
+  }
   return s;
 }
