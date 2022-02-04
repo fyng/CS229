@@ -13,19 +13,12 @@ Fixedpoint fixedpoint_create(uint64_t whole) {
   Fixedpoint fp;
   fp.whole = whole;
   fp.frac = 0UL;
-<<<<<<< HEAD
   fp.is_neg = 0;
   fp.is_overflow_neg = 0;
   fp.is_overflow.pos = 0;
   fp.is_underflow.pos = 0;
   fp.is_underflow.neg = 0;
   fp.is_valid = 1;
-=======
-
-  fp.is_neg = 0;
-  fp.is_err = 0;
-  fp.invalid = 0;
->>>>>>> refs/remotes/origin/main
   return fp;
 }
 
@@ -33,19 +26,12 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
   Fixedpoint fp;
   fp.whole = whole;
   fp.frac = frac;
-<<<<<<< HEAD
   fp.is_neg = 0;
   fp.is_overflow_neg = 0;
   fp.is_overflow_pos = 0;
   fp.is_underflow_neg = 0;
   fp.is_underflow_pos = 0;
   fp.is_valid = 1;
-=======
-
-  fp.is_neg = 0;
-  fp.is_err = 0;
-  fp.invalid = 0;
->>>>>>> refs/remotes/origin/main
   return fp;
 }
 
