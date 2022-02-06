@@ -274,12 +274,7 @@ char *fixedpoint_format_as_hex(Fixedpoint val) {
   if (frac != 0){
     *(s + offset) = '.';
     offset++;
-
-    // bitwise and with 1111
-    // while ((frac & 15UL) == 0){
-    //   frac = frac >> 4;
-    // }
-
+    
     // CONCEPT 2:
     // convert to hex string with left 0 padding. 
     // Then truncate trailing 0s
