@@ -15,7 +15,6 @@ typedef struct {
   int is_overflow_pos;
   int is_underflow_neg;
   int is_underflow_pos;
-  int is_valid;
 } Fixedpoint;
 
 // Create a Fixedpoint value representing an integer.

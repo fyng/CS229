@@ -15,7 +15,6 @@ Fixedpoint fixedpoint_create(uint64_t whole) {
   fp.is_overflow_pos = 0;
   fp.is_underflow_pos = 0;
   fp.is_underflow_neg = 0;
-  fp.is_valid = 1;
   return fp;
 }
 
@@ -28,21 +27,17 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
   fp.is_overflow_pos = 0;
   fp.is_underflow_neg = 0;
   fp.is_underflow_pos = 0;
-  fp.is_valid = 1;
   return fp;
 }
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
   Fixedpoint fp;
-  // "f6a5865.00f2"
-  // "258627685.242"
   fp.whole = 0UL;
   fp.frac = 0UL;
   fp.is_neg = 0;
+  fp.is_err = 0;
 
   uint64_t whole, frac;
-  // Do i need this?
-
   char * negptr;
   char * pptr; 
   negptr = strchr(hex, '-');
@@ -51,20 +46,20 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex) {
   // check legal length
   unsigned int length = (unsigned)strlen(hex);
   if (negptr != NULL) {
+    if ((negptr - hex) != 0) {
+      fp.is_err = 1;
+      return fp;
+    }
     length--;
     hex++;
     fp.is_neg = 1;
   }
-  if (pptr == NULL) {
-    if (length > 16){
+  if (pptr != NULL){
+    if ((pptr - hex) > 16 || (length - (pptr - hex + 1)) > 16) {
       fp.is_err = 1;
       return fp;
-    }
-  } 
-  // else if (length > 33 || (pptr - hex) > 16) {
-  //   fp.is_err = 1;
-  //   return fp;
-  // }
+    } 
+  }   
   
   whole = strtoul(hex, &hex, 16);
   if (pptr != NULL) {
@@ -257,7 +252,12 @@ int fixedpoint_is_underflow_pos(Fixedpoint val) {
 }
 
 int fixedpoint_is_valid(Fixedpoint val) {
-  return val.is_valid;
+  if (fixedpoint_is_err(val) || fixedpoint_is_overflow_neg(val) 
+  || fixedpoint_is_overflow_pos(val) || fixedpoint_is_underflow_neg(val) 
+  || fixedpoint_is_underflow_pos(val)) {
+    return 0;
+  }
+  return 1;
 }
 
 char *fixedpoint_format_as_hex(Fixedpoint val) {
