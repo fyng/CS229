@@ -31,6 +31,10 @@ void test_sub(TestObjs *objs);
 void test_is_overflow_pos(TestObjs *objs);
 void test_is_err(TestObjs *objs);
 // TODO: add more test functions
+void test_add_two_positive(TestObjs *objs);
+void test_add_two_negative(TestObjs *objs);
+void test_add_smallneg(TestObjs *objs);
+void test_add_bigneg(TestObjs *objs);
 
 int main(int argc, char **argv) {
   // if a testname was specified on the command line, only that
@@ -50,6 +54,12 @@ int main(int argc, char **argv) {
   TEST(test_sub);
   TEST(test_is_overflow_pos);
   TEST(test_is_err);
+
+  // Custome Tests
+  TEST(test_add_two_positive);
+  TEST(test_add_two_negative);
+  TEST(test_add_smallneg);
+  TEST(test_add_bigneg);
 
   // IMPORTANT: if you add additional test functions (which you should!),
   // make sure they are included here.  E.g., if you add a test function
@@ -179,6 +189,79 @@ void test_negate(TestObjs *objs) {
   ASSERT(0xec9a1e2418UL == fixedpoint_frac_part(objs->large1));
   ASSERT(0x4d1a23c24fafUL == fixedpoint_frac_part(objs->large2));
 }
+
+// Adding Custom tests
+void test_add_two_positive(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create2(25, 25);
+  rhs = fixedpoint_create2(30, 30);
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum) == 0);
+  ASSERT(fixedpoint_whole_part(sum) == 55);
+  ASSERT(fixedpoint_frac_part(sum) == 55);
+}
+
+void test_add_two_negative(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create2(25, 25);
+  rhs = fixedpoint_create2(30, 30);
+  lhs = fixedpoint_negate(lhs);
+  rhs = fixedpoint_negate(rhs);
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum));
+  ASSERT(fixedpoint_whole_part(sum) == 55);
+  ASSERT(fixedpoint_frac_part(sum) == 55);
+}
+
+void test_add_smallneg(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create2(25, 25);
+  rhs = fixedpoint_create2(30, 30);
+  lhs = fixedpoint_negate(lhs);
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum) == 0);
+  ASSERT(fixedpoint_whole_part(sum) == 5);
+  ASSERT(fixedpoint_frac_part(sum) == 5);
+}
+
+void test_add_bigneg(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create2(25, 25);
+  rhs = fixedpoint_create2(30, 30);
+  rhs = fixedpoint_negate(rhs);
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum));
+  ASSERT(fixedpoint_whole_part(sum) == 5);
+  ASSERT(fixedpoint_frac_part(sum) == 5);
+}
+
+void test_add_frac_overflow(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create2(25, 51);
+  rhs = fixedpoint_create2(30, 50);
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum) == 0);
+  ASSERT(fixedpoint_whole_part(sum) == 56);
+  ASSERT(fixedpoint_frac_part(sum) == );
+}
+
+
+// End of Custom Tests
 
 void test_add(TestObjs *objs) {
   (void) objs;
