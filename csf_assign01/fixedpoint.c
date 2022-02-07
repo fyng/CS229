@@ -177,7 +177,7 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
   }
   val.frac >> 1;
 
-  if((init_whole & 0UL) == 1){
+  if((init_whole & 1UL) == 1){
     val.frac = val.frac + (1UL << 63);
   }
   return val;
@@ -193,7 +193,7 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
   uint64_t initial_whole = val.whole;
   val.whole << 1;
   val.whole += did_overflow;
-  if (val.whole > initial_whole) {
+  if (val.whole < initial_whole) {
     if (val.is_neg = 1) {
       val.is_overflow_neg = 1;
     }
