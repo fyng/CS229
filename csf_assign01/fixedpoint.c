@@ -143,7 +143,7 @@ sum.whole -= 1;
 }
 
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
-  Fixedpoint difference;
+  Fixedpoint difference = fixedpoint_create(0UL);
   Fixedpoint negated_right = fixedpoint_negate(right);
   difference = fixedpoint_add(left, negated_right);
   return difference;
