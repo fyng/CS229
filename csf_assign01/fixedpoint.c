@@ -192,7 +192,6 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
   }
   uint64_t initial_whole = val.whole;
   val.whole = val.whole << 1;
-  val.whole += did_overflow;
   if (val.whole < initial_whole) {
     if (val.is_neg == 1) {
       val.is_overflow_neg = 1;
@@ -202,6 +201,7 @@ Fixedpoint fixedpoint_double(Fixedpoint val) {
     }
   }
   
+  val.whole = val.whole + did_overflow;
   return val;
 }
 
