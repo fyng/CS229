@@ -96,50 +96,49 @@ uint64_t fixedpoint_frac_part(Fixedpoint val) {
 }
 
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
-  Fixedpoint sum;
+  Fixedpoint sum = fixedpoint_create(0UL);
+
   if (left.is_neg == right.is_neg) {
+    sum.is_neg = left.is_neg;
     sum.whole = left.whole + right.whole;
     sum.frac = left.frac + right.frac;
     if (sum.frac < left.frac || sum.frac < right.frac) {
       sum.whole += 1UL;
     }
-    sum.is_neg = left.is_neg;
-    sum.is_overflow_neg = 0;
-    sum.is_overflow_pos = 0;
     if (sum.whole < left.whole || sum.whole < right.whole) {
       if (sum.is_neg == 1) {
-	sum.is_overflow_neg = 1;
-      }
-      else {
-	sum.is_overflow_pos = 1;
+      	sum.is_overflow_neg = 1;
+      } else {
+      	sum.is_overflow_pos = 1;
       }
     }
+    return sum;
+  }
+
+  // left negative, right positive
+  if (left.is_neg > right.is_neg) {
+    sum.whole = right.whole - left.whole;
+    if (left.whole > right.whole) {
+      sum.whole -= 1;
+    }
+    sum.frac = right.frac - left.frac;
   }
   else {
-    sum.is_neg = 0;
-    if (left.is_neg > right.is_neg) {
-      sum.whole = right.whole - left.whole;
-      if (left.whole > right.whole) {
-	sum.whole -= 1;
-      }
-      sum.frac = right.frac - left.frac;
+    sum.whole = left.whole - right.whole;
+    if (right.whole > left.whole) {
+sum.whole -= 1;
     }
-    else {
-      sum.whole = left.whole - right.whole;
-      if (right.whole > left.whole) {
-	sum.whole -= 1;
-      }
-      sum.frac = left.frac - right.frac;
-    }
-    if (sum.whole > left.whole || sum.whole > right.whole) {
-      sum.whole = 18446744073709551615UL + 1UL - sum.whole;
-      sum.is_neg = 1;
-    }
-    if (sum.frac > left.frac || sum.frac > right.frac) {
-      sum.frac = 18446744073709551615UL + 1UL - sum.frac;
-      sum.whole = sum.whole - 1UL;
-    }
+    sum.frac = left.frac - right.frac;
   }
+  if (sum.whole > left.whole || sum.whole > right.whole) {
+    sum.whole = 18446744073709551615UL + 1UL - sum.whole;
+    sum.is_neg = 1;
+  }
+  if (sum.frac > left.frac || sum.frac > right.frac) {
+    sum.frac = 18446744073709551615UL + 1UL - sum.frac;
+    sum.whole = sum.whole - 1UL;
+  }
+
   return sum;
 }
 
