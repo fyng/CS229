@@ -165,17 +165,17 @@ Fixedpoint fixedpoint_negate(Fixedpoint val) {
 
 Fixedpoint fixedpoint_halve(Fixedpoint val) {
   uint64_t init_whole = val.whole;
-  val.whole >> 1;
+  val.whole = val.whole >> 1;
 
   if ((val.frac & 1UL) == 1){
-    if (val.is_neg = 1) {
+    if (val.is_neg == 1) {
       val.is_underflow_neg = 1;
     }
     else {
       val.is_underflow_pos = 1;
     }
   }
-  val.frac >> 1;
+  val.frac = val.frac >> 1;
 
   if((init_whole & 1UL) == 1){
     val.frac = val.frac + (1UL << 63);
@@ -186,15 +186,15 @@ Fixedpoint fixedpoint_halve(Fixedpoint val) {
 Fixedpoint fixedpoint_double(Fixedpoint val) {
   uint64_t initial_frac = val.frac;
   int did_overflow = 0;
-  val.frac << 1;
+  val.frac = val.frac << 1;
   if (val.frac < initial_frac) {
     did_overflow = 1;
   }
   uint64_t initial_whole = val.whole;
-  val.whole << 1;
+  val.whole = val.whole << 1;
   val.whole += did_overflow;
   if (val.whole < initial_whole) {
-    if (val.is_neg = 1) {
+    if (val.is_neg == 1) {
       val.is_overflow_neg = 1;
     }
     else {
