@@ -211,19 +211,22 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right) {
   if (right.is_neg == 1 && left.is_neg == 0) {
     return 1;
   }
-  if (left.whole > right.whole) {
-    return 1;
+
+  // both negative
+  if (left.is_neg == 1 && right.is_neg == 1){
+    if (left.whole > right.whole) return -1;
+    if (left.whole < right.whole) return 1;
+    if (left.frac > right.frac) return -1;
+    if (left.frac < right.frac) return 1;
+    return 0;
   }
-  if (right.whole > left.whole) {
-    return -1;
-  }
-  if (left.frac > right.frac) {
-    return 1;
-  }
-  if (right.frac > left.frac) {
-    return -1;
-  }
-  return 0;
+
+  // both positive
+    if (left.whole > right.whole) return 1;
+    if (left.whole < right.whole) return -1;
+    if (left.frac > right.frac) return 1;
+    if (left.frac < right.frac) return -1;
+    return 0;
 }
 
 int fixedpoint_is_zero(Fixedpoint val) {
