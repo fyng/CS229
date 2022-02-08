@@ -31,10 +31,21 @@ void test_sub(TestObjs *objs);
 void test_is_overflow_pos(TestObjs *objs);
 void test_is_err(TestObjs *objs);
 // TODO: add more test functions
+void test_add_two_zeros(TestObjs *objs);
+void test_add_same_numbers(TestObjs *objs);
+void test_add_opposite_numbers(TestObjs *objs);
 void test_add_two_positive(TestObjs *objs);
 void test_add_two_negative(TestObjs *objs);
 void test_add_smallneg(TestObjs *objs);
 void test_add_bigneg(TestObjs *objs);
+void test_add_frac_overflow(TestObjs *objs);
+void test_add_whole_overflow(TestObjs *objs);
+void test_add_whole_overflow_neg(TestObjs *objs);
+void test_add_frac_whole_overflow(TestObjs *objs);
+void test_add_frac_whole_overflow_one(TestObjs *objs);
+void test_double(TestObjs *objs);
+void test_double_neg(TestObjs *objs);
+void test_double_whole_overflow(TestObjs *objs);
 
 int main(int argc, char **argv) {
   // if a testname was specified on the command line, only that
@@ -56,10 +67,21 @@ int main(int argc, char **argv) {
   TEST(test_is_err);
 
   // Custome Tests
+  TEST(test_add_two_zeros);
+  TEST(test_add_same_numbers);
+  TEST(test_add_opposite_numbers);
   TEST(test_add_two_positive);
   TEST(test_add_two_negative);
   TEST(test_add_smallneg);
   TEST(test_add_bigneg);
+  TEST(test_add_frac_overflow);
+  TEST(test_add_whole_overflow);
+  TEST(test_add_whole_overflow_neg);
+  TEST(test_add_frac_whole_overflow);
+  TEST(test_add_frac_whole_overflow_one);
+  TEST(test_double);
+  TEST(test_double_neg);
+  TEST(test_double_whole_overflow);
 
   // IMPORTANT: if you add additional test functions (which you should!),
   // make sure they are included here.  E.g., if you add a test function
@@ -191,6 +213,46 @@ void test_negate(TestObjs *objs) {
 }
 
 // Adding Custom tests
+void test_add_two_zeros(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create2(0, 0);
+  rhs = fixedpoint_create2(0, 0);
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum) == 0);
+  ASSERT(fixedpoint_whole_part(sum) == 0);
+  ASSERT(fixedpoint_frac_part(sum) == 0);
+}
+
+void test_add_same_numbers(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create2(1, 1);
+  rhs = fixedpoint_create2(1, 1);
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum) == 0);
+  ASSERT(fixedpoint_whole_part(sum) == 2);
+  ASSERT(fixedpoint_frac_part(sum) == 2);
+}
+
+void test_add_opposite_numbers(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create2(1, 1);
+  rhs = fixedpoint_create2(1, 1);
+  rhs = fixedpoint_negate(rhs);
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum) == 0);
+  ASSERT(fixedpoint_whole_part(sum) == 0);
+  ASSERT(fixedpoint_frac_part(sum) == 0);
+}
+
 void test_add_two_positive(TestObjs *objs) {
   (void) objs;
 
@@ -252,14 +314,120 @@ void test_add_frac_overflow(TestObjs *objs) {
 
   Fixedpoint lhs, rhs, sum;
 
-  lhs = fixedpoint_create2(25, 51);
-  rhs = fixedpoint_create2(30, 50);
+  lhs = fixedpoint_create2(25, 18446744073709551615UL);
+  rhs = fixedpoint_create2(30, 1);
   sum = fixedpoint_add(lhs, rhs);
   ASSERT(fixedpoint_is_neg(sum) == 0);
   ASSERT(fixedpoint_whole_part(sum) == 56);
-  ASSERT(fixedpoint_frac_part(sum) == );
+  ASSERT(fixedpoint_frac_part(sum) == 0);
 }
 
+void test_add_whole_overflow(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create_from_hex("FFFFFFFFFFFFFFFF.FFFFFFFFFFFFFFFF");
+  rhs = fixedpoint_create_from_hex("1.0");
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum) == 0);
+  ASSERT(fixedpoint_whole_part(sum) == 0);
+  ASSERT(fixedpoint_frac_part(sum) == 0xFFFFFFFFFFFFFFFFUL);
+  ASSERT(fixedpoint_is_overflow_neg(sum) == 0);
+  ASSERT(fixedpoint_is_overflow_pos(sum));
+  ASSERT(fixedpoint_is_underflow_neg(sum) == 0);
+  ASSERT(fixedpoint_is_underflow_pos(sum) == 0);
+}
+
+void test_add_whole_overflow_neg(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create_from_hex("-FFFFFFFFFFFFFFFF.FFFFFFFFFFFFFFFF");
+  rhs = fixedpoint_create_from_hex("-1.0");
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum));
+  ASSERT(fixedpoint_whole_part(sum) == 0);
+  ASSERT(fixedpoint_frac_part(sum) == 0xFFFFFFFFFFFFFFFFUL);
+  ASSERT(fixedpoint_is_overflow_neg(sum));
+  ASSERT(fixedpoint_is_overflow_pos(sum) == 0);
+}
+
+void test_add_frac_whole_overflow(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create_from_hex("FFFFFFFFFFFFFFFF.FFFFFFFFFFFFFFFF");
+  rhs = fixedpoint_create2(0, 1);
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum) == 0);
+  ASSERT(fixedpoint_frac_part(sum) == 0);
+  ASSERT(fixedpoint_whole_part(sum) == 0);
+  ASSERT(fixedpoint_is_overflow_pos(sum));
+  ASSERT(fixedpoint_is_overflow_neg(sum) == 0);
+}
+
+void test_add_frac_whole_overflow_one(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create_from_hex("FFFFFFFFFFFFFFFF.FFFFFFFFFFFFFFFF");
+  rhs = fixedpoint_create2(1, 2);
+  sum = fixedpoint_add(lhs, rhs);
+  ASSERT(fixedpoint_is_neg(sum) == 0);
+  ASSERT(fixedpoint_frac_part(sum) == 1);
+  ASSERT(fixedpoint_whole_part(sum) == 1);
+  ASSERT(fixedpoint_is_overflow_pos(sum));
+  ASSERT(fixedpoint_is_overflow_neg(sum) == 0);
+}
+
+void test_double(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint undoubled, doubled;
+
+  undoubled = fixedpoint_create2(5, 4);
+  doubled = fixedpoint_double(undoubled);
+  ASSERT(fixedpoint_is_neg(doubled) == 0);
+  ASSERT(fixedpoint_whole_part(doubled) == 10);
+  ASSERT(fixedpoint_frac_part(doubled) == 8);
+}
+
+void test_double_neg(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint undoubled, doubled;
+  
+  undoubled = fixedpoint_create2(5, 4);
+  undoubled = fixedpoint_negate(undoubled);
+  doubled = fixedpoint_double(undoubled);
+  ASSERT(fixedpoint_is_neg(doubled));
+  ASSERT(fixedpoint_whole_part(doubled) == 10);
+  ASSERT(fixedpoint_frac_part(doubled) == 8);
+}
+
+void test_double_whole_overflow(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint undoubled, doubled;
+
+  undoubled = fixedpoint_create_from_hex("FFFFFFFFFFFFFFFF.0");
+  doubled = fixedpoint_double(undoubled);
+  ASSERT(fixedpoint_is_neg(doubled) == 0);
+  ASSERT(fixedpoint_whole_part(doubled) == 0xFFFFFFFFFFFFFFFEUL);
+  ASSERT(fixedpoint_frac_part(doubled) == 0);
+}
+/*
+void test_double_whole_overflow_neg(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint undoubled, doubled;
+
+  
+  }*/
 
 // End of Custom Tests
 

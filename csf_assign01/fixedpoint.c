@@ -126,7 +126,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   else {
     sum.whole = left.whole - right.whole;
     if (right.whole > left.whole) {
-sum.whole -= 1;
+      sum.whole -= 1;
     }
     sum.frac = left.frac - right.frac;
   }
