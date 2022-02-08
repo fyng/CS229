@@ -33,15 +33,8 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac) {
 }
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex) {
-  Fixedpoint fp;
-  fp.whole = 0UL;
-  fp.frac = 0UL;
-  fp.is_neg = 0;
+  Fixedpoint fp = fixedpoint_create(0UL);
   fp.is_err = 1;
-  fp.is_overflow_neg = 0;
-  fp.is_overflow_pos = 0;
-  fp.is_underflow_neg = 0;
-  fp.is_underflow_pos = 0;
 
   uint64_t whole, frac;
   char *negptr;
@@ -102,45 +95,52 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
     sum.is_neg = left.is_neg;
     sum.whole = left.whole + right.whole;
     sum.frac = left.frac + right.frac;
-    if (sum.frac < left.frac || sum.frac < right.frac) {
+    if (sum.frac < left.frac || sum.frac < right.frac) {  
       sum.whole += 1UL;
     }
     if (sum.whole < left.whole || sum.whole < right.whole) {
       if (sum.is_neg == 1) {
-      	sum.is_overflow_neg = 1;
+        sum.is_overflow_neg = 1;
       } else {
-      	sum.is_overflow_pos = 1;
+        sum.is_overflow_pos = 1;
       }
     }
     return sum;
   }
 
+  // left positive, right negative
+  if (left.is_neg < right.is_neg) {
+    Fixedpoint temp = right;
+    right = left;
+    left = temp;
+  }
+
   // left negative, right positive
-  if (left.is_neg > right.is_neg) {
-    sum.whole = right.whole - left.whole;
-    if (left.whole > right.whole) {
-      sum.whole -= 1;
-    }
-    sum.frac = right.frac - left.frac;
+  if (right.whole == left.whole && left.frac > right.frac) {
+      sum.frac = 18446744073709551615UL - left.frac + right.frac + 1UL;
+      sum.is_neg = 1;
+      return sum;
   }
-  else {
-    sum.whole = left.whole - right.whole;
-    if (right.whole > left.whole) {
-      sum.whole -= 1;
-    }
-    sum.frac = left.frac - right.frac;
-  }
-  if (sum.whole > left.whole && sum.whole > right.whole) {
-    sum.whole = 18446744073709551615UL + 1UL - sum.whole;
+
+  if (left.whole > right.whole) {
     sum.is_neg = 1;
+    Fixedpoint tmp = right;
+    right = left;
+    left = tmp;
   }
-  if (sum.frac > left.frac && sum.frac > right.frac) {
-    sum.frac = 18446744073709551615UL + 1UL - sum.frac;
-    sum.whole = sum.whole - 1UL;
+
+  if (right.frac < left.frac) {
+    // borrowing
+    sum.frac = 18446744073709551615UL - left.frac + right.frac + 1UL;
+    sum.whole = right.whole - left.whole - 1;
+  } else {
+    sum.whole = right.whole - left.whole;
+    sum.frac = right.frac - left.frac;
   }
 
   return sum;
 }
+
 
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
   Fixedpoint difference = fixedpoint_create(0UL);
