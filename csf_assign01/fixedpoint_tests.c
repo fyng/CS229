@@ -316,13 +316,13 @@ void test_add_whole_and_frac(TestObjs *objs) {
 
   Fixedpoint lhs, rhs, sum;
 
-  lhs = fixedpoint_create2(2, 2);
-  rhs = fixedpoint_create2(0, 90);
+  lhs = fixedpoint_create2(2, 1UL);
+  rhs = fixedpoint_create2(0, 0xFFFFFFFFFFFFFFFFUL);
   rhs = fixedpoint_negate(rhs);
   sum = fixedpoint_add(rhs, lhs);
   ASSERT(fixedpoint_is_neg(sum) == 0);
   ASSERT(fixedpoint_whole_part(sum) == 1);
-  ASSERT(fixedpoint_frac_part(sum) == 88);
+  ASSERT(fixedpoint_frac_part(sum) == 2UL);
 }
 
 void test_add_frac_overflow(TestObjs *objs) {

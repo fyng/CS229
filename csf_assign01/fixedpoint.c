@@ -141,7 +141,6 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
   return sum;
 }
 
-
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right) {
   Fixedpoint difference = fixedpoint_create(0UL);
   Fixedpoint negated_right = fixedpoint_negate(right);
