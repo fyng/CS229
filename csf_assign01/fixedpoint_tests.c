@@ -47,6 +47,21 @@ void test_double(TestObjs *objs);
 void test_double_neg(TestObjs *objs);
 void test_double_whole_overflow(TestObjs *objs);
 void test_add_whole_and_frac(TestObjs *objs);
+void test_double_whole_overflow_neg(TestObjs *objs);
+void test_double_frac_overflow(TestObjs *objs);
+void test_halve_whole(TestObjs *objs);
+void test_halve_frac(TestObjs *objs);
+void test_halve_odd_whole(TestObjs *objs);
+void test_halve_neg(TestObjs *objs);
+void test_halve_underflow_pos(TestObjs *objs);
+void test_halve_underflow_neg(TestObjs *objs);
+void test_compare_pos_neg(TestObjs *objs);
+void test_compare_two_pos_whole(TestObjs *objs);
+void test_compare_two_pos_frac(TestObjs *objs);
+void test_compare_two_neg_whole(TestObjs *objs);
+void test_compare_two_neg_frac(TestObjs *objs);
+void test_compare_equals(TestObjs *objs);
+void test_compare_equals_zeros(TestObjs *objs);
 
 int main(int argc, char **argv) {
   // if a testname was specified on the command line, only that
@@ -67,7 +82,7 @@ int main(int argc, char **argv) {
   TEST(test_is_overflow_pos);
   TEST(test_is_err);
 
-  // Custome Tests
+  // Custome Add Tests
   TEST(test_add_two_zeros);
   TEST(test_add_same_numbers);
   TEST(test_add_opposite_numbers);
@@ -81,9 +96,30 @@ int main(int argc, char **argv) {
   TEST(test_add_frac_whole_overflow);
   TEST(test_add_frac_whole_overflow_one);
   TEST(test_add_whole_and_frac);
+
+  //Custom Double Tests
   TEST(test_double);
   TEST(test_double_neg);
   TEST(test_double_whole_overflow);
+  TEST(test_double_whole_overflow_neg);
+  TEST(test_double_frac_overflow);
+
+  //Custom Halve Tests
+  TEST(test_halve_whole);
+  TEST(test_halve_frac);
+  TEST(test_halve_odd_whole);
+  TEST(test_halve_neg);
+  TEST(test_halve_underflow_pos);
+  TEST(test_halve_underflow_neg);
+
+  //Custom Compare Tests
+  TEST(test_compare_pos_neg);
+  TEST(test_compare_two_pos_whole);
+  TEST(test_compare_two_pos_frac);
+  TEST(test_compare_two_neg_whole);
+  TEST(test_compare_two_neg_frac);
+  TEST(test_compare_equals);
+  TEST(test_compare_equals_zeros);
 
   // IMPORTANT: if you add additional test functions (which you should!),
   // make sure they are included here.  E.g., if you add a test function
@@ -435,15 +471,187 @@ void test_double_whole_overflow(TestObjs *objs) {
   ASSERT(fixedpoint_is_neg(doubled) == 0);
   ASSERT(fixedpoint_whole_part(doubled) == 0xFFFFFFFFFFFFFFFEUL);
   ASSERT(fixedpoint_frac_part(doubled) == 0);
+  ASSERT(fixedpoint_is_overflow_pos(doubled));
 }
-/*
+
 void test_double_whole_overflow_neg(TestObjs *objs) {
   (void) objs;
 
   Fixedpoint undoubled, doubled;
 
-  
-  }*/
+  undoubled = fixedpoint_create_from_hex("-FFFFFFFFFFFFFFFF.0");
+  doubled = fixedpoint_double(undoubled);
+  ASSERT(fixedpoint_is_neg(doubled));
+  ASSERT(fixedpoint_whole_part(doubled) == 0xFFFFFFFFFFFFFFFEUL);
+  ASSERT(fixedpoint_frac_part(doubled) == 0);
+  ASSERT(fixedpoint_is_overflow_neg(doubled));
+  }
+
+void test_double_frac_overflow(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint undoubled, doubled;
+
+  undoubled = fixedpoint_create_from_hex("0.FFFFFFFFFFFFFFFF");
+  doubled = fixedpoint_double(undoubled);
+  ASSERT(fixedpoint_whole_part(doubled) == 0x1UL);
+  ASSERT(fixedpoint_frac_part(doubled) == 0xFFFFFFFFFFFFFFFEUL);
+}
+
+void test_halve_whole(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint unhalved, halved;
+
+  unhalved = fixedpoint_create_from_hex("00000000FFFFFFF0.0");
+  halved = fixedpoint_halve(unhalved);
+  ASSERT(fixedpoint_is_neg(halved) == 0);
+  ASSERT(fixedpoint_whole_part(halved) == 0x000000007FFFFFF8UL);
+  ASSERT(fixedpoint_frac_part(halved) == 0x0UL);
+}
+
+void test_halve_frac(TestObjs * objs) {
+  (void) objs;
+
+  Fixedpoint unhalved, halved;
+
+  unhalved = fixedpoint_create_from_hex("0.00000000FFFFFFF0");
+  halved = fixedpoint_halve(unhalved);
+  ASSERT(fixedpoint_is_neg(halved) == 0);
+  ASSERT(fixedpoint_whole_part(halved) == 0);
+  ASSERT(fixedpoint_frac_part(halved) == 0x000000007FFFFFF8UL);
+}
+
+void test_halve_odd_whole(TestObjs * objs) {
+  (void) objs;
+
+  Fixedpoint unhalved, halved;
+
+  unhalved = fixedpoint_create_from_hex("0000000000000003.0");
+  halved = fixedpoint_halve(unhalved);
+  ASSERT(fixedpoint_whole_part(halved) == 0x0000000000000001UL);
+  ASSERT(fixedpoint_frac_part(halved) == 0x8000000000000000UL);
+}
+
+void test_halve_neg(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint unhalved, halved;
+
+  unhalved = fixedpoint_create_from_hex("-0000000000000002.0000000000000002");
+  halved = fixedpoint_halve(unhalved);
+  ASSERT(fixedpoint_is_neg(halved));
+  ASSERT(fixedpoint_whole_part(halved) == 0x0000000000000001);
+  ASSERT(fixedpoint_frac_part(halved) == 0x0000000000000001);
+}
+
+void test_halve_underflow_pos(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint unhalved, halved;
+
+  unhalved = fixedpoint_create_from_hex("0.0000000000000001");
+  halved = fixedpoint_halve(unhalved);
+  ASSERT(fixedpoint_is_neg(halved) == 0);
+  ASSERT(fixedpoint_is_underflow_pos(halved));
+  ASSERT(fixedpoint_is_underflow_neg(halved) == 0);
+  ASSERT(fixedpoint_whole_part(halved) == 0x0UL);
+  ASSERT(fixedpoint_frac_part(halved) == 0x0UL);
+}
+
+void test_halve_underflow_neg(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint unhalved, halved;
+
+  unhalved = fixedpoint_create_from_hex("-0.0000000000000001");
+  halved = fixedpoint_halve(unhalved);
+  ASSERT(fixedpoint_is_neg(halved));
+  ASSERT(fixedpoint_is_underflow_neg(halved));
+  ASSERT(fixedpoint_is_underflow_pos(halved) == 0);
+  ASSERT(fixedpoint_whole_part(halved) == 0x0UL);
+  ASSERT(fixedpoint_frac_part(halved) == 0x0UL);
+}
+
+void test_compare_pos_neg(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint positive, negative;
+
+  positive = fixedpoint_create_from_hex("000000000000000F.000000000000000F");
+  negative = fixedpoint_create_from_hex("-000000000000000F.000000000000000F");
+  ASSERT(fixedpoint_compare(positive, negative) == 1);
+  ASSERT(fixedpoint_compare(negative, positive) == -1);
+}
+
+void test_compare_two_pos_whole(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint biggerpos, smallerpos;
+
+  biggerpos = fixedpoint_create_from_hex("000000000000000F.0");
+  smallerpos = fixedpoint_create_from_hex("0000000000000001.0");
+  ASSERT(fixedpoint_compare(biggerpos, smallerpos) == 1);
+  ASSERT(fixedpoint_compare(smallerpos, biggerpos) == -1);
+}
+
+void test_compare_two_pos_frac(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint biggerpos, smallerpos;
+
+  biggerpos = fixedpoint_create_from_hex("0.000000000000000F");
+  smallerpos = fixedpoint_create_from_hex("0.0000000000000001");
+  ASSERT(fixedpoint_compare(biggerpos, smallerpos) == 1);
+  ASSERT(fixedpoint_compare(smallerpos, biggerpos) == -1);
+}
+
+void test_compare_two_neg_whole(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint biggerneg, smallerneg;
+
+  biggerneg = fixedpoint_create_from_hex("-000000000000000F.0");
+  smallerneg = fixedpoint_create_from_hex("-0000000000000001.0");
+  ASSERT(fixedpoint_compare(biggerneg, smallerneg) == -1);
+  ASSERT(fixedpoint_compare(smallerneg, biggerneg) == 1);
+}
+
+void test_compare_two_neg_frac(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint biggerneg, smallerneg;
+
+  biggerneg = fixedpoint_create_from_hex("-0.000000000000000F");
+  smallerneg = fixedpoint_create_from_hex("-0.0000000000000001");
+  ASSERT(fixedpoint_compare(biggerneg, smallerneg) == -1);
+  ASSERT(fixedpoint_compare(smallerneg, biggerneg) == 1);
+}
+
+void test_compare_equals(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint same_num_1, same_num_2;
+
+  same_num_1 = fixedpoint_create_from_hex("0000000000000001.0000000000000001");
+  same_num_2 = fixedpoint_create_from_hex("0000000000000001.0000000000000001");
+  ASSERT(fixedpoint_compare(same_num_1, same_num_2) == 0);
+  ASSERT(fixedpoint_compare(same_num_2, same_num_1) == 0);
+  same_num_1 = fixedpoint_negate(same_num_1);
+  same_num_2 = fixedpoint_negate(same_num_2);
+  ASSERT(fixedpoint_compare(same_num_1, same_num_2) == 0);
+  ASSERT(fixedpoint_compare(same_num_2, same_num_1) == 0);
+}
+
+void test_compare_equals_zeros(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint zero1, zero2;
+
+  zero1 = fixedpoint_create_from_hex("0.0");
+  zero2 = fixedpoint_create_from_hex("-0.0");
+  ASSERT(fixedpoint_compare(zero1, zero2) == 0);
+}
 
 // End of Custom Tests
 

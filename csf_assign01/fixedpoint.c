@@ -138,6 +138,11 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
     sum.frac = right.frac - left.frac;
   }
 
+  // check if zero to set as positive
+  if (sum.whole == 0 && sum.frac == 0) {
+    sum.is_neg = 0;
+  }
+  
   return sum;
 }
 
