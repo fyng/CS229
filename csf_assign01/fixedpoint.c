@@ -130,11 +130,11 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right) {
     }
     sum.frac = left.frac - right.frac;
   }
-  if (sum.whole > left.whole || sum.whole > right.whole) {
+  if (sum.whole > left.whole && sum.whole > right.whole) {
     sum.whole = 18446744073709551615UL + 1UL - sum.whole;
     sum.is_neg = 1;
   }
-  if (sum.frac > left.frac || sum.frac > right.frac) {
+  if (sum.frac > left.frac && sum.frac > right.frac) {
     sum.frac = 18446744073709551615UL + 1UL - sum.frac;
     sum.whole = sum.whole - 1UL;
   }

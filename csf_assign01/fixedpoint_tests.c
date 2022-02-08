@@ -46,6 +46,7 @@ void test_add_frac_whole_overflow_one(TestObjs *objs);
 void test_double(TestObjs *objs);
 void test_double_neg(TestObjs *objs);
 void test_double_whole_overflow(TestObjs *objs);
+void test_add_whole_and_frac(TestObjs *objs);
 
 int main(int argc, char **argv) {
   // if a testname was specified on the command line, only that
@@ -79,6 +80,7 @@ int main(int argc, char **argv) {
   TEST(test_add_whole_overflow_neg);
   TEST(test_add_frac_whole_overflow);
   TEST(test_add_frac_whole_overflow_one);
+  TEST(test_add_whole_and_frac);
   TEST(test_double);
   TEST(test_double_neg);
   TEST(test_double_whole_overflow);
@@ -307,6 +309,20 @@ void test_add_bigneg(TestObjs *objs) {
   ASSERT(fixedpoint_is_neg(sum));
   ASSERT(fixedpoint_whole_part(sum) == 5);
   ASSERT(fixedpoint_frac_part(sum) == 5);
+}
+
+void test_add_whole_and_frac(TestObjs *objs) {
+  (void) objs;
+
+  Fixedpoint lhs, rhs, sum;
+
+  lhs = fixedpoint_create2(2, 2);
+  rhs = fixedpoint_create2(0, 90);
+  rhs = fixedpoint_negate(rhs);
+  sum = fixedpoint_add(rhs, lhs);
+  ASSERT(fixedpoint_is_neg(sum) == 0);
+  ASSERT(fixedpoint_whole_part(sum) == 1);
+  ASSERT(fixedpoint_frac_part(sum) == 88);
 }
 
 void test_add_frac_overflow(TestObjs *objs) {
