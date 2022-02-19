@@ -4,3 +4,38 @@
 #include "hexfuncs.h"
 
 // TODO: add function implementations here
+unsigned hex_read(char data_buf[]) {
+    // filedes == 0 defined to be stdin
+    ssize_t n = read(0, data_buf, 16);
+    if (n==0){
+        // error handling
+    }
+    return n;
+}
+
+void hex_write_string(const char s[]){
+    int i = 0;
+    while (*(s+i) != '\0'){
+        // filedes == 1 defined to be stdout
+        write(1, s+i, 1);
+        i++;
+    }
+}
+
+void hex_format_offset(unsigned offset, char sbuf[]){
+    for (int i=0; i<8; i++){
+        *(sbuf+i) = (char) ((offset << i) >> (7-i));
+    }
+}
+
+void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]){
+    *(sbuf) = (char) ((byteval >> 4) << 4);
+    *(sbuf+1) = (char) ((byteval << 4) >> 4);
+}
+
+char hex_to_printable(unsigned char byteval){
+    if (byteval < 32 || byteval > 126){
+        return '.';
+    }
+    return (char) byteval;
+}
