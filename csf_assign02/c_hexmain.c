@@ -19,8 +19,22 @@ int main(void) {
       hex_write_string(sbuf);
       hex_write_string(" ");
     }
+    for (int i=0; i < (16U - count); i++){
+      hex_write_string("   ");
+    }
+    hex_write_string(" ");
+    
+    int i = 0;
+    while (data_buf[i] != '\0') {
+      data_buf[i] = hex_to_printable(data_buf[i]);
+      i++;
+    }
 
     hex_write_string(data_buf);
+
+    for (int i=0; i < 16; i++) {
+      data_buf[i] = '\0';
+    }
     hex_write_string("\n");
     count = hex_read(data_buf);
   }
