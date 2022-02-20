@@ -11,7 +11,7 @@ unsigned hex_read(char data_buf[]);
 // Write given nul-terminated string to standard output.
 void hex_write_string(const char s[]);
 
-// Format a long value as an offset string consisting of exactly 8
+// // Format an unsigned value as an offset string consisting of exactly 8
 // hex digits.  The formatted offset is stored in sbuf, which must
 // have enough room for a string of length 8.
 void hex_format_offset(unsigned offset, char sbuf[]);
