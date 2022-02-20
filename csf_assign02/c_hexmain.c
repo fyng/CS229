@@ -10,7 +10,7 @@ int main(void) {
 
   while(count != 0U){
     hex_format_offset(offset, sbuf);
-    hex_write_string(sbuf);   
+    hex_write_string(sbuf);
     hex_write_string(": "); 
     offset += 16U;
     
@@ -24,4 +24,4 @@ int main(void) {
     hex_write_string("\n");
     count = hex_read(data_buf);
   }
-}
+} 
