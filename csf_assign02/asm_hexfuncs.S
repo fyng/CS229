@@ -9,7 +9,7 @@
 	/* TODO: add functions here */
 	/* asm_hexfuncs.S may call read and write 8 */
 	/*
-	 * Notes:
+	 * Notes: 	xxd 
 	 * Callee-saved registers: rbx, rbp, rsp, r12-r15
 	 * Subroutine arguments:  rdi, rsi, rdx, rcx, r8, r9
  	*/
@@ -74,7 +74,8 @@
 		movq %rdi, %r8 /* %r8 stores unsigned char byteval */
 		shlq $4, %r8 /* divide by 16 */
 
-		/* FIXME */
+		movq $sHexDigits, %rdx
+		movb (%rdx, r8, 1) (%rsi)
 
 		addq $8, %rsp
 		ret
