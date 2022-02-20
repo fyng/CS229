@@ -31,7 +31,7 @@ void hex_format_offset(unsigned offset, char sbuf[]) {
  }
 
 void hex_format_byte_as_hex(unsigned char byteval, char sbuf[]) {
-    const char * hex = "0123456789ABCDEF";
+    const char * hex = "0123456789abcdef";
     *sbuf++ = hex[0+(byteval / 16U)] ;
     *sbuf++ = hex[0+(byteval % 16U)];
     *sbuf = '\0';
