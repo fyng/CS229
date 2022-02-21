@@ -33,6 +33,11 @@ int main(void) {
     }
     
     hex_write_string("\n");
-    count = hex_read(data_buf);
+    if (count < 16) {
+      count = 0;
+    }
+    else {
+      count = hex_read(data_buf);
+    }
   }
 } 

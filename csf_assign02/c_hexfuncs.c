@@ -5,12 +5,17 @@
 
 // TODO: add function implementations here
 unsigned hex_read(char data_buf[]) {
-    // filedes == 0 defined to be stdin
-    ssize_t n = read(0, data_buf, 16);
-    if (n==0){
-        // error handling
+  // filedes == 0 defined to be stdin
+  ssize_t n = 0;
+  n = read(0, data_buf, 16 - n);
+  while (n < 16) {
+    ssize_t ctrl_d_check = n;
+    n += read(0, (data_buf + n), 16 - n);
+    if (n == ctrl_d_check) {
+      return n;
     }
-    return n;
+  }
+  return n;
 }
 
 void hex_write_string(const char s[]) {
