@@ -75,7 +75,6 @@
 		shlq $4, %r8 /* divide by 16 */
 
 		movq $sHexDigits, %rdx
-		movb (%rdx, r8, 1) (%rsi)
 
 		addq $8, %rsp
 		ret
