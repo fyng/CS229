@@ -67,19 +67,21 @@
 	*/
 	hex_format_byte_as_hex:
 		subq $8, %rsp
+		pushq %rbx
 		//movb %al, %ah				/* copy byte in %al to %ah */
 		//shrb $4, %ah 				/* ah takes higher tibble */
 		andq $0x0f, %rdi			/* rsi takes lower tibble */
 
 		movq $sHexDigits, %r9
-		movq (%r9, %rdi, 1), %rsi 	/* sil = r9[rdi] */
-		movq (%r9, %rdi, 1), %rax 	/* sil = r9[rdi] */
+		movq (%r9, %rdi, 1), %rbx 	/* sil = r9[rdi] */
+		// movq (%r9, %rdi, 1), %rax 	/* sil = r9[rdi] */
 
 		//incb %al
 		//movb (%r9, %rdi, 1), %al	
 		//incb %al
-		//movb $0x00, %al	 			/* add null terminator
+		//movb $0x00, %al	 			/* add null terminator */
 
+		popq %rbx
 		addq $8, %rsp
 		ret
 
