@@ -6,9 +6,9 @@
 
 
 	.section .text
-	/* TODO: add functions here */
-	/* asm_hexfuncs.S may call read and write 8 */
-	/*
+	/* TODO: add functions here
+	 * asm_hexfuncs.S may call read and write 8
+	 *
 	 * Notes: 	xxd 
 	 * Callee-saved registers: rbx, rbp, rsp, r12-r15
 	 * Subroutine arguments:  rdi, rsi, rdx, rcx, r8, r9
@@ -19,7 +19,6 @@
 		.globl hex_format_byte_as_hex
 		.globl hex_to_printable
 		
-
 	hex_read:
 		subq $8, %rsp
 		/* TODO: implement function */
@@ -36,7 +35,6 @@
 	* %rdi: unsigned offset
 	* %rsi: char sbuf[]
 	* %rcx: loop counter
-	*
 	*/
 	hex_format_offset:
 		subq $8, %rsp
@@ -53,7 +51,6 @@
 		shlq $3, %rcx
 
 		movb %r8b, (%rsi, %rcx, 2)	/* copy 1 byte value from %r8 to sbuf */ 
-
 		inc %rcx
 
 	.LbyteHexDone:
@@ -62,43 +59,48 @@
 		addq $8, %rsp
 		ret
 
-
 	/* 
 	* %rdi: unsigned char byteval
 	* %rsi: char sbuf[]
 	* %r10: loop counter
 	*
 	*/
-hex_format_byte_as_hex:
-	subq $8, %rsp
-	movq %rdi, %r8				/* %r8 stores unsigned char byteval */
-	shlq $4, %r8 				/* r8 /= 16 */
-	movq $sHexDigits, %r9
-	movb (%r9, %r8, 1), %al 	/* al = r9[r8] */
+	hex_format_byte_as_hex:
+		subq $8, %rsp
+		//movb %al, %ah				/* copy byte in %al to %ah */
+		//shrb $4, %ah 				/* ah takes higher tibble */
+		andq $0x0f, %rdi			/* rsi takes lower tibble */
 
-	movq $sHexDigits, %rdx
+		movq $sHexDigits, %r9
+		movq (%r9, %rdi, 1), %rsi 	/* sil = r9[rdi] */
+		movq (%r9, %rdi, 1), %rax 	/* sil = r9[rdi] */
 
-	addq $8, %rsp
-	ret
+		//incb %al
+		//movb (%r9, %rdi, 1), %al	
+		//incb %al
+		//movb $0x00, %al	 			/* add null terminator
 
-hex_to_printable:
-	subq $8, %rsp
-	movq $0, %rax
+		addq $8, %rsp
+		ret
 
-	cmpq $32, %rdi		/* rdi less than 32? */
-	jl .LPrintPeriod 	/* jump to .LPrintPeriod */
-	cmpq $126, %rdi		/* rdi greater than 126? */
-	jg .LPrintPeriod	/* jump to .LPrintPeriod */
+	hex_to_printable:
+		subq $8, %rsp
+		movq $0, %rax
 
-	movq %rdi, %rax		/* byteval is good, return val */
-	jmp .LPrintDone
+		cmpq $32, %rdi		/* rdi less than 32? */
+		jl .LPrintPeriod 	/* jump to .LPrintPeriod */
+		cmpq $126, %rdi		/* rdi greater than 126? */
+		jg .LPrintPeriod	/* jump to .LPrintPeriod */
 
-	.LPrintPeriod:	
-	movb $46, %al 		/* byteval is good, return 46 (period in decimal) */
+		movq %rdi, %rax		/* byteval is good, return val */
+		jmp .LPrintDone
 
-	.LPrintDone:
-	addq $8, %rsp
-	ret
+		.LPrintPeriod:	
+		movb $46, %al 		/* byteval is good, return 46 (period in decimal) */
+
+		.LPrintDone:
+		addq $8, %rsp
+		ret
 
 /* vim:ft=gas:
  */
