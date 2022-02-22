@@ -71,8 +71,10 @@
 	*/
 hex_format_byte_as_hex:
 	subq $8, %rsp
-	movq %rdi, %r8 /* %r8 stores unsigned char byteval */
-	shlq $4, %r8 /* divide by 16 */
+	movq %rdi, %r8				/* %r8 stores unsigned char byteval */
+	shlq $4, %r8 				/* r8 /= 16 */
+	movq $sHexDigits, %r9
+	movb (%r9, %r8, 1), %al 	/* al = r9[r8] */
 
 	movq $sHexDigits, %rdx
 
@@ -81,25 +83,20 @@ hex_format_byte_as_hex:
 
 hex_to_printable:
 	subq $8, %rsp
-	// Use rdi to hold byteval argument
-	// Compare rdi to 32
-	cmpq $32, %rdi
-	// If rdi is less than 32, jump to .Lprintperiod
-	jl .Lprintperiod
-	// Compare rdi to 126
-	cmpq $126, %rdi
-	// If rdi is greater than 126, jump to .Lprintperiod
-	jg .Lprintperiod
+	movq $0, %rax
 
-	// If byteval is good, move val in rdi to return val
-	movq %rdi, %r15
-	addq $8, %rsp
-	ret
+	cmpq $32, %rdi		/* rdi less than 32? */
+	jl .LPrintPeriod 	/* jump to .LPrintPeriod */
+	cmpq $126, %rdi		/* rdi greater than 126? */
+	jg .LPrintPeriod	/* jump to .LPrintPeriod */
 
-	// Here, if byteval is outside range, move 42 (period in decimel) to return
-	.Lprintperiod
-		movq $42, %r15  
-	
+	movq %rdi, %rax		/* byteval is good, return val */
+	jmp .LPrintDone
+
+	.LPrintPeriod:	
+	movb $46, %al 		/* byteval is good, return 46 (period in decimal) */
+
+	.LPrintDone:
 	addq $8, %rsp
 	ret
 
