@@ -69,21 +69,39 @@
 	* %r10: loop counter
 	*
 	*/
-	hex_format_byte_as_hex:
-		subq $8, %rsp
-		movq %rdi, %r8 /* %r8 stores unsigned char byteval */
-		shlq $4, %r8 /* divide by 16 */
+hex_format_byte_as_hex:
+	subq $8, %rsp
+	movq %rdi, %r8 /* %r8 stores unsigned char byteval */
+	shlq $4, %r8 /* divide by 16 */
 
-		movq $sHexDigits, %rdx
+	movq $sHexDigits, %rdx
 
-		addq $8, %rsp
-		ret
+	addq $8, %rsp
+	ret
 
-	hex_to_printable:
-		subq $8, %rsp
-		/* TODO: implement function */
-		addq $8, %rsp
-		ret
+hex_to_printable:
+	subq $8, %rsp
+	// Use rdi to hold byteval argument
+	// Compare rdi to 32
+	cmpq $32, %rdi
+	// If rdi is less than 32, jump to .Lprintperiod
+	jl .Lprintperiod
+	// Compare rdi to 126
+	cmpq $126, %rdi
+	// If rdi is greater than 126, jump to .Lprintperiod
+	jg .Lprintperiod
+
+	// If byteval is good, move val in rdi to return val
+	movq %rdi, %r15
+	addq $8, %rsp
+	ret
+
+	// Here, if byteval is outside range, move 42 (period in decimel) to return
+	.Lprintperiod
+		movq $42, %r15  
+	
+	addq $8, %rsp
+	ret
 
 /* vim:ft=gas:
  */
