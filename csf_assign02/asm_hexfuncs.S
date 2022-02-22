@@ -67,30 +67,23 @@
 	*/
 hex_format_byte_as_hex:
 	subq $8, %rsp
-	//movb %al, %ah/* copy byte in %al to %ah */
+	//set rax to 0 to clear values
 	movq $0, %rax
+	// move the byteval to r8
 	movq %rdi, %r8
-	shrb $4, %r8b 				/* ah takes higher tibble */
-	andq $0x0f, %rdi			/* rsi takes lower tibble */
-	
+	// right shift r8 to get the proper index value
+	shrb $4, %r8b
+	// based on c code, add the 0 to set rdi
+	andq $0x0f, %rdi	
+	// Let r9 take the hexdigits
 	movq $sHexDigits, %r9
 	movb (%r9, %r8, 1), %al 	/* sil = r9[rdi] */
-	//pushb %al
+	// move the hexadecimal val to rsi or sbuf[0]
 	movb %al, 0(%rsi)
-	//pop %sil
-	//add $1, (%sil)
-	
-	//shlq $4, %rax
-	//orq %rdi, %rax
+	// get the next hexadecimal for the char to print
 	movb (%r9, %rdi, 1), %al 	/* sil = r9[rdi] */
-	//push %al
-	//pop %sil
+	// move the next hex val to rsi or sbuf[1]
 	movb %al, 1(%rsi)
-	//add $1, (%sil)
-
-	//incb %al
-	//movb (%r9, %rdi, 1), %al	
-	//incb %al
 	movb $0x00, 2(%rsi)	 			/* add null terminator */
 	
 	addq $8, %rsp
