@@ -56,9 +56,22 @@ void testFormatByteAsHex(TestObjs *objs) {
   char buf[16];
   hex_format_byte_as_hex(objs->test_data_1[0], buf);
   ASSERT(0 == strcmp(buf, "48"));
+
+  // user added tests
+  hex_format_byte_as_hex(' ', buf);
+  ASSERT(0 == strcmp(buf, "20"));
+
+  hex_format_byte_as_hex('z', buf);
+  ASSERT(0 == strcmp(buf, "7a"));
 }
 
 void testHexToPrintable(TestObjs *objs) {
   ASSERT('H' == hex_to_printable(objs->test_data_1[0]));
   ASSERT('.' == hex_to_printable(objs->test_data_1[13]));
+
+  // user added tests
+  ASSERT('.' == hex_to_printable((unsigned char) 31));
+  ASSERT(' ' == hex_to_printable((unsigned char) 32));
+  ASSERT('~' == hex_to_printable((unsigned char) 126));
+  ASSERT('.' == hex_to_printable((unsigned char) 127));
 }
