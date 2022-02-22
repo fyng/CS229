@@ -22,12 +22,13 @@ unsigned hex_read(char data_buf[]) {
 }
 
 void hex_write_string(const char s[]) {
-    int i = 0;
-    while (*(s+i) != '\0'){
+  int i = 0;
+    while (i < 16 && s[i] != '\0'){
         // filedes == 1 defined to be stdout
-        write(1, s+i, 1);
         i++;
     }
+    write(1, s, i);
+  
 }
 
 void hex_format_offset(unsigned offset, char sbuf[]) {
