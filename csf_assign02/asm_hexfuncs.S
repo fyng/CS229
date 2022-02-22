@@ -65,25 +65,36 @@
 	* %r10: loop counter
 	*
 	*/
-	hex_format_byte_as_hex:
-		subq $8, %rsp
-		pushq %rbx
-		//movb %al, %ah				/* copy byte in %al to %ah */
-		//shrb $4, %ah 				/* ah takes higher tibble */
-		andq $0x0f, %rdi			/* rsi takes lower tibble */
+hex_format_byte_as_hex:
+	subq $8, %rsp
+	//movb %al, %ah/* copy byte in %al to %ah */
+	movq $0, %rax
+	movq %rdi, %r8
+	shrb $4, %r8b 				/* ah takes higher tibble */
+	andq $0x0f, %rdi			/* rsi takes lower tibble */
+	
+	movq $sHexDigits, %r9
+	movb (%r9, %r8, 1), %al 	/* sil = r9[rdi] */
+	//pushb %al
+	movb %al, 0(%rsi)
+	//pop %sil
+	//add $1, (%sil)
+	
+	//shlq $4, %rax
+	//orq %rdi, %rax
+	movb (%r9, %rdi, 1), %al 	/* sil = r9[rdi] */
+	//push %al
+	//pop %sil
+	movb %al, 1(%rsi)
+	//add $1, (%sil)
 
-		movq $sHexDigits, %r9
-		movq (%r9, %rdi, 1), %rbx 	/* sil = r9[rdi] */
-		// movq (%r9, %rdi, 1), %rax 	/* sil = r9[rdi] */
-
-		//incb %al
-		//movb (%r9, %rdi, 1), %al	
-		//incb %al
-		//movb $0x00, %al	 			/* add null terminator */
-
-		popq %rbx
-		addq $8, %rsp
-		ret
+	//incb %al
+	//movb (%r9, %rdi, 1), %al	
+	//incb %al
+	movb $0x00, 2(%rsi)	 			/* add null terminator */
+	
+	addq $8, %rsp
+	ret
 
 	hex_to_printable:
 		subq $8, %rsp
@@ -97,6 +108,7 @@
 		movq %rdi, %rax		/* byteval is good, return val */
 		jmp .LPrintDone
 
+	
 		.LPrintPeriod:	
 		movb $46, %al 		/* byteval is good, return 46 (period in decimal) */
 
