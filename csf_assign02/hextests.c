@@ -50,6 +50,26 @@ void testFormatOffset(TestObjs *objs) {
   char buf[16];
   hex_format_offset(1L, buf);
   ASSERT(0 == strcmp(buf, "00000001"));
+
+  // test zero
+  hex_format_offset(0L, buf);
+  ASSERT(0 == strcmp(buf, "00000000"));
+
+  // test digits
+  hex_format_offset(305419896L, buf);
+  ASSERT(0 == strcmp(buf, "12345678"));  
+  hex_format_offset(9L, buf);
+  ASSERT(0 == strcmp(buf, "00000009"));  
+
+  // test letters
+  hex_format_offset(2882461458L, buf);
+  ASSERT(0 == strcmp(buf, "abcedf12"));
+
+  // test largest hex
+  hex_format_offset(4294967295L, buf);
+  ASSERT(0 == strcmp(buf, "ffffffff"));
+
+
 }
 
 void testFormatByteAsHex(TestObjs *objs) {
@@ -57,21 +77,35 @@ void testFormatByteAsHex(TestObjs *objs) {
   hex_format_byte_as_hex(objs->test_data_1[0], buf);
   ASSERT(0 == strcmp(buf, "48"));
 
-  // user added tests
+  // test small letter vs capital
+  hex_format_byte_as_hex('h', buf);
+  ASSERT(0 == strcmp(buf, "68"));
+   
+  // test symbols
   hex_format_byte_as_hex(' ', buf);
   ASSERT(0 == strcmp(buf, "20"));
+  hex_format_byte_as_hex('@', buf);
+  ASSERT(0 == strcmp(buf, "40"));
 
-  hex_format_byte_as_hex('z', buf);
-  ASSERT(0 == strcmp(buf, "7a"));
+  // test unprintable characters
+  hex_format_byte_as_hex('\0', buf);
+  ASSERT(0 == strcmp(buf, "00"));
+  hex_format_byte_as_hex((unsigned char) 10, buf);
+  ASSERT(0 == strcmp(buf, "0a")); 
+  hex_format_byte_as_hex((unsigned char) 127, buf);
+  ASSERT(0 == strcmp(buf, "7f"));   
 }
 
 void testHexToPrintable(TestObjs *objs) {
   ASSERT('H' == hex_to_printable(objs->test_data_1[0]));
   ASSERT('.' == hex_to_printable(objs->test_data_1[13]));
 
-  // user added tests
+  // test byte char < 32
   ASSERT('.' == hex_to_printable((unsigned char) 31));
+
   ASSERT(' ' == hex_to_printable((unsigned char) 32));
   ASSERT('~' == hex_to_printable((unsigned char) 126));
+
+  // test byte char > 126
   ASSERT('.' == hex_to_printable((unsigned char) 127));
 }
