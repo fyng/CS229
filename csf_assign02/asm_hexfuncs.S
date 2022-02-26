@@ -26,8 +26,24 @@ hex_read:
 	ret
 
 hex_write_string:
+.LhexWriteStringLoop:
 	subq $8, %rsp
-	/* TODO: implement function */
+	movq $0, %r10	/* initialize %r12 to 0 */
+
+	cmpq $16, %r10 	/* r10 >= 16? */
+	jae .Ldone
+	cmpq $0x00, (%rsi, %r10, 1)
+	je .Ldone
+
+	inc %r10
+	jmp .LhexWriteStringLoop
+
+	movq %rdi, %rsi	/* %rsi takes char s[] */
+	movq $1, %rdi
+	movq %r10, %rdx
+	call write
+
+.Ldone:
 	addq $8, %rsp
 	ret
 
