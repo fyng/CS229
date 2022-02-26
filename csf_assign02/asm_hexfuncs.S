@@ -21,7 +21,41 @@ sHexDigits: .string "0123456789abcdef"
 	
 hex_read:
 	subq $8, %rsp
-	/* TODO: implement function */
+	pushq %r12 		/* %r12 is n counter. Stack pointer aligned*/
+	pushq %r13 		/* %r13 is previous n counter */
+	pushq %r14
+	movq %rdi, %r14	/* %r14 stores data_buf[] */
+
+	movq %r14, %rsi /* %rsi takes data_buf[] */
+	movq $0, %rdi
+	movq $16,%rdx	
+	call read		/* read (0, data_buff[], 16) */
+	movq %rax, %r12
+	cmpq $0, %r12
+	je .LhexReadDone 
+
+.LhexReadLoop:
+	cmpq $16, %r12	/* %r12 >= 16 ? */
+	jae .LhexReadDone
+
+	movq %r12, %r13 /* %r13 stores %r12 */
+	movq $0, %rdi
+	movq (%r14, %r12, 1), %rsi
+	movq $16, %rdx 
+	subq %r12, %rdx	/* compute 16 - n */
+	call read 		/* read(0, databuf + n, 16 - n) */
+
+	addq %rax, %r12 /* add read length to n */
+	cmpq %r12, %r13 
+	je .LhexReadDone
+
+	jmp .LhexReadLoop
+
+.LhexReadDone:
+	movq %rsi, %rdi	/* %rdi takes data_buf[] */
+	popq %r14
+	popq %r13
+	popq %r12		/* restore %r12, realign stack pointer */
 	addq $8, %rsp
 	ret
 
@@ -31,9 +65,9 @@ hex_write_string:
 	movq $0, %r10	/* initialize %r12 to 0 */
 
 	cmpq $16, %r10 	/* r10 >= 16? */
-	jae .Ldone
+	jae .hexWriteStringLdone
 	cmpq $0x00, (%rsi, %r10, 1)
-	je .Ldone
+	je .hexWriteStringLdone
 
 	inc %r10
 	jmp .LhexWriteStringLoop
@@ -43,7 +77,7 @@ hex_write_string:
 	movq %r10, %rdx
 	call write
 
-.Ldone:
+.hexWriteStringLdone:
 	addq $8, %rsp
 	ret
 
