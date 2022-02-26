@@ -38,24 +38,33 @@ hex_write_string:
 */
 hex_format_offset:
 	subq $8, %rsp
-	movq $0, %rcx
+	pushq %r12		/* loop counter */
+	pushq %r13		/* copy of %rdi (unsigned offset) */
+	movq $0, %r12	/* initialise loop counter %r12 */
+	movl %edi, %r13d	/* copy unsigned offset to %r13d */
 
 .LbyteHexLoop:
-	movq %rdi, %r8 /* %r8 stores unsigned offset */
-	cmpq $4, %rcx
+	movl %r13d, %edi
+	cmpq $4, %r12 	/* end loop when %r10 is above equal to 4 */
 	jae .LbyteHexDone
-	/*movq %ecx, %r11 /* copy counter value to %r11 */
-	shlq $3, %rcx
-	shrq %cl, %r8
-	shlq $24, %r8
-	shlq $3, %rcx
 
-	movb %r8b, (%rsi, %rcx, 2)	/* copy 1 byte value from %r8 to sbuf */ 
-	inc %rcx
+	movb %r12b, %cl
+	shlb $3, %cl	/* %cl = %cl*8 */
+	shll %cl, %edi 	/* %edi << %cl */
+	shrl $24, %edi 	/* %edi >> 24 */
+
+	/* call on hex_format_byte_as_hex */
+	call hex_format_byte_as_hex
+	incq %rsi		
+	incq %rsi
+	incq %r12		
+	jmp .LbyteHexLoop
 
 .LbyteHexDone:
-	movb $0, (%rsi, %rcx, 2) /* add null terminator */
-	movq %rsi, %rax /* copy to function return */
+	movb $0x00, %sil	 	/* add null terminator */
+
+	popq %r13
+	popq %r12
 	addq $8, %rsp
 	ret
 
