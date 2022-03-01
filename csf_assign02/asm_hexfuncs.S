@@ -3,6 +3,7 @@
 .section .rodata
 /* TODO: add read-only data such as strings here */
 sHexDigits:	.string "0123456789abcdef"
+//sNull:	.string "\0"
 
 .section .text
 /* TODO: add functions here
@@ -52,6 +53,7 @@ hex_read:
 
 .LhexReadDone:
 	movq %rsi, %rdi	/* %rdi takes data_buf[] */
+	movq %r12, %rax /* return the value from r12 to return rax */
 	popq %r14
 	popq %r13
 	popq %r12		/* restore %r12, realign stack pointer */
@@ -59,24 +61,24 @@ hex_read:
 	ret
 
 hex_write_string:
-.LhexWriteStringLoop:
 	subq $8, %rsp
-	movq $0, %r10	/* initialize %r12 to 0 */
-
+	movq $0, %r10	/* initialize %r10 to 0, for counter */
+	//movq $3, %r11	/* set r11 to sNull */
+	
+.LhexWriteStringLoop:
 	cmpq $16, %r10 	/* r10 >= 16? */
 	jae .hexWriteStringLdone
-	cmpq $0x00, (%rsi, %r10, 1)
+	cmpq $3, (%rsi, %r10, 1)
 	je .hexWriteStringLdone
 
 	inc %r10
 	jmp .LhexWriteStringLoop
 
-	movq %rdi, %rsi	/* %rsi takes char s[] */
+.hexWriteStringLdone:
+	movq %rdi, %rsi
 	movq $1, %rdi
 	movq %r10, %rdx
 	call write
-
-.hexWriteStringLdone:
 	addq $8, %rsp
 	ret
 
