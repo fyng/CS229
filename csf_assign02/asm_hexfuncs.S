@@ -2,8 +2,7 @@
 
 .section .rodata
 /* TODO: add read-only data such as strings here */
-sHexDigits: .string "0123456789abcdef"
-
+sHexDigits:	.string "0123456789abcdef"
 
 .section .text
 /* TODO: add functions here
