@@ -6,16 +6,22 @@ sTripleSpace:	.string "   "
 sNullSpace:	.string "\0"
 sNewLine:	.string "\n"
 
+	.data
+data_buf:	.space 16
+sbuf:	.space 9
+	
 	.section .text
 	
 	.globl main
 main:
 	movq $0, %r15	/* Let r15 hold the offset */
-	movq $0, %r14	/* Let r14 hold data_buf */
-	movq $0, %r13	/* Let r13 hold sbuf */
+	movq $data_buf, %r14	/* Let r14 hold data_buf */
+	movq $sbuf, %r13	/* Let r13 hold sbuf */
 	movq $0, %rbx	/* Let rbx be any print constants */
 	movq $0, %rbp	/* Let rbp represent for loop counters */
 	movq $0, %r9 	/* Let r9 help dereference variables */
+	movq $0, %rsi	/* Clear rsi */
+	movq $0, %rdi	/* Clear rdi */
 	call hex_read	/* Call hex_read and let it fill data_buf */
 	movq %rdi, %r14	/* Move first argument back to %r14 */
 	movq %rax, %r12	/* Place return value to r12 */
