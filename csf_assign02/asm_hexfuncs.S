@@ -20,7 +20,7 @@ sHexDigits:	.string "0123456789abcdef"
 	.globl hex_to_printable
 	
 hex_read:
-	subq $8, %rsp
+	// subq $8, %rsp
 	pushq %r12 		/* %r12 is n counter. Stack pointer aligned*/
 	pushq %r13 		/* %r13 is previous n counter */
 	pushq %r14
@@ -57,7 +57,7 @@ hex_read:
 	popq %r14
 	popq %r13
 	popq %r12		/* restore %r12, realign stack pointer */
-	addq $8, %rsp
+	// addq $8, %rsp
 	ret
 
 hex_write_string:
@@ -68,7 +68,7 @@ hex_write_string:
 .LhexWriteStringLoop:
 	cmpq $16, %r10 	/* r10 >= 16? */
 	jae .hexWriteStringLdone
-	cmpq $3, (%rsi, %r10, 1)
+	cmpb $0, (%rdi, %r10, 1)
 	je .hexWriteStringLdone
 
 	inc %r10
