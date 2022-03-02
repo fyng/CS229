@@ -110,7 +110,7 @@ main:
 .LContinue:
 	movq %r14, %rdi	/* Move data_buf to argument position 1 */
 	call hex_read
-	movq %rdi, %r14	/* Update data_buf for any changes */
+	//movq %rdi, %r14	/* Update data_buf for any changes */
 	movq %rax, %r12 /* Reupdate counter based on hex_read output */
 	jmp .LProgramLoop
 
