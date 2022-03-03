@@ -108,4 +108,7 @@ void testHexToPrintable(TestObjs *objs) {
 
   // test byte char > 126
   ASSERT('.' == hex_to_printable((unsigned char) 127));
+
+  // test '\n' to '.'
+  ASSERT('.' == hex_to_printable('\n'));
 }

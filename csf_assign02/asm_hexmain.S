@@ -66,7 +66,7 @@ main:
 	call hex_write_string
 	movb (%r14, %rbp, 1), %dil
 	call hex_to_printable
-	movb %dil, (%r14, %rbp, 1)
+	movb %al, (%r14, %rbp, 1)
 	inc %rbp	/* Increment loop counter rbp */
 	jmp .LHexStringStart
 	
