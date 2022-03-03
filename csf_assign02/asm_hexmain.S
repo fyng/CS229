@@ -115,6 +115,7 @@ main:
 	jmp .LProgramLoop
 
 .LProgramEnd:	
+	movq $0, %rax	/* main returns 0 */
 	popq %rbp
 	popq %rbx
 	popq %r15
