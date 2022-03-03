@@ -29,30 +29,30 @@ hex_read:
 		movq $0, %rdi
 		movq $16,%rdx	
 		call read		/* read (0, data_buff[], 16) */
-		movq %rax, %r12  // 13
-		cmpq $0, %r12
+		movl %eax, %r12d  // 13
+		cmpl $0, %r12d
 		je .LhexReadDone 
 
 	.LhexReadLoop:
-		cmpq $16, %r12	/* %r12 >= 16 ? */
+		cmpl $16, %r12d	/* %r12 >= 16 ? */
 		jae .LhexReadDone
 
-		movq %r12, %r13 /* %r13 stores %r12 */
+		movl %r12d, %r13d /* %r13 stores %r12 */
 		movq $0, %rdi
 		leaq (%r14, %r12, 1), %rsi
 		movq $16, %rdx 
-		subq %r12, %rdx	/* compute 16 - n */
+		subl %r12d, %edx	/* compute 16 - n */
 		call read 		/* read(0, databuf + n, 16 - n) */
 
 		addq %rax, %r12 /* add read length to n */
-		cmpq %r12, %r13 
+		cmpl %r12d, %r13d 
 		je .LhexReadDone
 
 		jmp .LhexReadLoop
 
 	.LhexReadDone:
-		movq %rsi, %rdi	/* %rdi takes data_buf[] */
-		movq %r12, %rax /* return the value from r12 to return rax */
+		movq %r14, %rdi	/* %rdi takes data_buf[] */
+		movl %r12d, %eax /* return the value from r12 to return rax */
 		popq %r14
 		popq %r13
 		popq %r12		/* restore %r12, realign stack pointer */
