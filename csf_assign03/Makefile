@@ -4,8 +4,8 @@ CFLAGS=-std=c99 -pedantic -Wall -Wextra
 csim: main.o
 	$(CC) -o csim main.o -g
 
-main.o: main.c main.h
+main.o: main.c
 	$(CC) $(CFLAGS) -c main.c -g
 
 clean:
-	rm -f *.o hw3 *~
+	rm -f *.o csim *~
