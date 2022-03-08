@@ -1,11 +1,11 @@
 CC=gcc
 CFLAGS=-std=c99 -pedantic -Wall -Wextra
 
-csim: main.o
-	$(CC) -o csim main.o -g
+csim: csim_main.o
+	$(CC) -o csim csim_main.o -g
 
-main.o: main.c
-	$(CC) $(CFLAGS) -c main.c -g
+main.o: csim_main.c
+	$(CC) $(CFLAGS) -c csim_main.c -g
 
 clean:
 	rm -f *.o csim *~
