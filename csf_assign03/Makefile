@@ -1,16 +1,15 @@
-CC=gcc
-CFLAGS=-std=c99 -pedantic -Wall -Wextra
+CC = c++
+CFLAGS = -std=c++11 -pedantic -Wall -Wextra
 
-csim: csim_main.o
-	$(CC) -o csim csim_main.o -g
+main: main.o
+	$(CC) -o main main.o -g
 
-main.o: csim_main.c
-	$(CC) $(CFLAGS) -c csim_main.c -g
+main.o: main.cpp
+	$(CC) $(CFLAGS) -c main.cpp -g
 
 clean:
 	rm -f *.o csim *~
 
-# Use this target to create a zipfile that you can submit to Gradescope
 .PHONY: solution.zip
 solution.zip :
 	rm -f solution.zip
