@@ -9,3 +9,9 @@ main.o: csim_main.c
 
 clean:
 	rm -f *.o csim *~
+
+# Use this target to create a zipfile that you can submit to Gradescope
+.PHONY: solution.zip
+solution.zip :
+	rm -f solution.zip
+	zip -9r $@ Makefile README.txt *.h *.c *.S
