@@ -1,11 +1,13 @@
 CC = c++
 CFLAGS = -std=c++11 -pedantic -Wall -Wextra
 
-main: main.o
-	$(CC) -o main main.o -g
+%.o : %.cpp
+	gcc $(CFLAGS) -c $<
 
-main.o: main.cpp
-	$(CC) $(CFLAGS) -c main.cpp -g
+csim: csim.o cfuncs.o
+	$(CC) -o csim csim.o cfuncs.o -g
+
+
 
 clean:
 	rm -f *.o csim *~
