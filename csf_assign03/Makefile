@@ -6,13 +6,11 @@ CFLAGS = -std=c++11 -pedantic -Wall -Wextra
 
 csim: csim.o cfuncs.o
 	$(CC) -o csim csim.o cfuncs.o -g
-
-
-
+	
 clean:
 	rm -f *.o csim *~
 
 .PHONY: solution.zip
 solution.zip :
 	rm -f solution.zip
-	zip -9r $@ Makefile README.txt *.h *.c *.S
+	zip -9r $@ Makefile README.txt *.h *.cpp
