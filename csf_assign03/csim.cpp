@@ -67,13 +67,6 @@ int main (int argc, char* argv[]) {
     return 1;
   }
   
-  cout << num_set << endl;
-  cout << blocks_per_set << endl;
-  cout << bytes_per_block << endl;
-  cout << write_alloc << endl;
-  cout << write_mode << endl;
-  cout << evic << endl;
-
   // Parameters to keep track of and print
   int total_loads = 0;
   int total_stores = 0;
@@ -239,7 +232,7 @@ int main (int argc, char* argv[]) {
 		    count++;
 		  }
 		  if (cache.at(index).at(block_index_low_acc).dirty == true) {
-		    total_cycles += 100 * (bytes_per_block / 4));
+		    total_cycles += 100 * (bytes_per_block / 4);
 		  }
 		store_miss++;
                 if (write_alloc == 1 && write_mode == 1) {
