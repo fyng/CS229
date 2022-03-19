@@ -104,7 +104,7 @@ int main (int argc, char* argv[]) {
     new_block.num_accesses = 0;
     new_block.dirty = false;
     // If loading
-    if (action.compare("l")) {
+    if (action.compare("l") == 0) {
       total_loads++;
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
@@ -166,7 +166,7 @@ int main (int argc, char* argv[]) {
       }
     } 
     // store
-    else if (action.compare("s")) {
+    else if (action.compare("s") == 0) {
       total_stores++;
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
