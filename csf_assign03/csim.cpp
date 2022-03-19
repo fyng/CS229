@@ -137,7 +137,7 @@ int main (int argc, char* argv[]) {
 	    // If the block does not exist
 	    else {
 	    // If there is space
-	      if (cache.at(index).size() < blocks_per_set) {
+	      if ((int) cache.at(index).size() < blocks_per_set) {
 		cache.at(index).push_back(new_block);
 		load_miss++;
 		total_cycles += 1 + (100 * (bytes_per_block / 4));
@@ -146,12 +146,12 @@ int main (int argc, char* argv[]) {
 	      else {
 		// The case for lru
 		if (evic == 1) {
-		  int lowest_accesses = cache.at(index).at(0);
+		  int lowest_accesses = cache.at(index).at(0).num_accesses;
 		  int block_index_low_acc = 0;
 		  int count = 0;
 		  for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
 		    if ((*it).num_accesses < lowest_accesses) {
-		      lowest_accesses = num_accesses;
+		      lowest_accesses = (*it).num_accesses;
 		      block_index_low_acc = count;
 		    }
 		    count++;
