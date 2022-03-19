@@ -1,0 +1,12 @@
+/*.o
+/c_hexdump
+/c_hextests
+/asm_hexdump
+/asm_hextests
+/casm_hexdump
+/depend.mak
+/solution.zip
+/test_*
+/actual
+/expected
+/*.rb
