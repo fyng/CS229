@@ -8,23 +8,4 @@ bool isPowTwo(int n);
 
 int logTwo (int n);
 
-// while getline(cin, string)
-string sl 
-string addr
-
-// assume perfect address
-string >> sl;
-string >> addr;
-
-int address = stoi(addr, 0 , 16);
-int offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
-int index = (address << (32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(num_set));
-int tag = address >> (logTwo(bytes_per_block) + logTwo(num_set));
-
-// read UI input
-// determine s/l --> 
-// determine offset --> int
-// determine index --> int 
-// determines tag 
-
 #endif
