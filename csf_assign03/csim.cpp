@@ -156,6 +156,9 @@ int main (int argc, char* argv[]) {
 		    }
 		    count++;
 		  }
+		  if (cache.at(index).at(block_index_low_acc).dirty == true) {
+		    total_cycles += (100 * (bytes_per_block) / 4);
+		  }
 		  cache.at(index).at(block_index_low_acc) = new_block;
 		  load_miss++;
 		  total_cycles += 1 + (100 * (bytes_per_block / 4));
@@ -171,14 +174,23 @@ int main (int argc, char* argv[]) {
     } 
     // store
     else if (action.compare("s")) {
-
-      total_loads++;
+      total_stores++;
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
         cache.insert(pair<int, vector<block>> (index, vector<block>() ));
-        cache.at(index).push_back(new_block);
-        load_miss++;
-        total_cycles += 1 + (100 * (bytes_per_block / 4));
+	store_miss++;
+	if (write_alloc == 1 && write_mode == 1) {
+	  cache.at(index).push_back(new_block);
+	  total_cycles += 1 + (100 * (bytes_per_block / 4));
+	}
+	else if (write_alloc == 0 && write_mode == 1) {
+	  total_cycles += 100 * (bytes_per_block / 4);
+	}
+	else {
+	  new_block.dirty = true;
+	  cache.at(index).push_back(new_block);
+	  total_cycles++;
+	}
       }
       // If the set exists
       else if (cache.find(index) != cache.end()) {
@@ -191,16 +203,26 @@ int main (int argc, char* argv[]) {
 	      }
       // If the block exists
       if (hit) {
-        load_hits++;
+        store_hits++;
         total_cycles++;
       }
 	    // If the block does not exist
 	    else {
 	    // If there is space
 	      if ((int) cache.at(index).size() < blocks_per_set) {
-		cache.at(index).push_back(new_block);
-		load_miss++;
-		total_cycles += 1 + (100 * (bytes_per_block / 4));
+		store_miss++;
+		if (write_alloc == 1 && write_mode == 1) {
+		  cache.at(index).push_back(new_block);
+		  total_cycles += 1 + (100 * (bytes_per_block / 4));
+		}
+		else if (write_alloc == 0 && write_mode == 1) {
+		  total_cycles += 100 * (bytes_per_block / 4);
+		}
+		else {
+		  new_block.dirty = true;
+		  cache.at(index).push_back(new_block);
+		  total_cycles++;
+		}
 	      }
 	      // If there is no space
 	      else {
@@ -216,25 +238,39 @@ int main (int argc, char* argv[]) {
 		    }
 		    count++;
 		  }
-		  cache.at(index).at(block_index_low_acc) = new_block;
-		  load_miss++;
-		  total_cycles += 1 + (100 * (bytes_per_block / 4));
-		}
-		// The case for FIFO
-		else {
-		}
+		  if (cache.at(index).at(block_index_low_acc).dirty == true) {
+		    total_cycles += 100 * (bytes_per_block / 4));
+		  }
+		store_miss++;
+                if (write_alloc == 1 && write_mode == 1) {
+                  cache.at(index).push_back(new_block);
+                  total_cycles += 1 + (100 * (bytes_per_block / 4));
+                }
+                else if (write_alloc == 0 && write_mode == 1) {
+                  total_cycles += 100 * (bytes_per_block / 4);
+                }
+                else {
+                  new_block.dirty = true;
+                  cache.at(index).push_back(new_block);
+                  total_cycles++;
+                }
+		
+	      }
+	      // The case for FIFO
+	      else {
 	      }
 	    }
-      } else {
-	// Was not given a valid block
       }
-
-
-
     } else {
-      // Did not read 'l' or 's'
+      // Was not given a valid block
     }
+
+    
+    
+  } else {
+    // Did not read 'l' or 's'
   }
+}
 
   // Print out parameter values asked for
   cout << "Total loads: " << total_loads << endl;
