@@ -73,6 +73,9 @@ int main (int argc, char* argv[]) {
   cout << write_mode << endl;
   cout << evic << endl;
 
+
+
+
   // Parameters to keep track of and print
   int total_loads = 0;
   int total_stores = 0;
@@ -91,14 +94,20 @@ int main (int argc, char* argv[]) {
   
   // Cache set up
   map<int, vector<block>> cache;
-  string trace_line = get_line();
-  while (trace_line != NULL) {
-    // Get primary parameters
-    char action = get_action(trace_line);
-    int address = get_address(trace_line);
-    int offset = get_offset(address);
-    int index = get_index(address);
-    int tag = get_tag(address);
+  string trace_line;
+
+  while (getline(cin, trace_line)) {
+    string sl; 
+    string addr;
+    string >> sl;
+    string >> addr;
+
+    char action = sl[0];
+    int address = stoi(addr, 0 , 16);
+    int offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
+    int index = (address << (32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(num_set));
+    int tag = address >> (logTwo(bytes_per_block) + logTwo(num_set));
+
     // Create the Block struct
     block new_block;
     new_block.tag = tag;
