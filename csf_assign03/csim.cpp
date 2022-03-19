@@ -114,16 +114,16 @@ int main (int argc, char* argv[]) {
     if (action.compare("l")) {
       total_loads++;
       // If there is no set existent yet
-      if (cache[index] == NULL) {
+      if (cache.find(index) == cache.end()) {
         cache.insert(pair<int, vector<block>> (index, vector<block>() ));
         cache.at(index).push_back(new_block);
         load_miss++;
         total_cycles += 1 + (100 * (bytes_per_block / 4));
       }
       // If the set exists
-      else if (cache[index] != NULL) {
+      else if (cache.find(index) != cache.end()) {
         bool hit = false;
-        for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++it) {
+        for (vector<block>::iterator it = cache.at(index).begin(); it != cache.at(index).end(); ++it) {
           if ((*it).tag == new_block.tag) {
             hit = true;
             (*it).num_accesses++;
@@ -137,34 +137,34 @@ int main (int argc, char* argv[]) {
 	    // If the block does not exist
 	    else {
 	    // If there is space
-	    if (cache[index].size() < blocks_per_set) {
-	      cache.at(index).push_back(new_block);
-	      load_miss++;
-	      total_cycles += 1 + (100 * (bytes_per_block / 4));
-	    }
-	    // If there is no space
-	    else {
-	      // The case for lru
-	      if (evic == 1) {
-          int lowest_accesses = cache.at(index).at(0);
-          int block_index_low_acc = 0;
-          int count = 0;
-          for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
-            if ((*it).num_accesses < lowest_accesses) {
-              lowest_accesses = num_accesses;
-              block_index_low_acc = count;
-            }
-		      count++;
+	      if (cache.at(index).size() < blocks_per_set) {
+		cache.at(index).push_back(new_block);
+		load_miss++;
+		total_cycles += 1 + (100 * (bytes_per_block / 4));
+	      }
+	      // If there is no space
+	      else {
+		// The case for lru
+		if (evic == 1) {
+		  int lowest_accesses = cache.at(index).at(0);
+		  int block_index_low_acc = 0;
+		  int count = 0;
+		  for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
+		    if ((*it).num_accesses < lowest_accesses) {
+		      lowest_accesses = num_accesses;
+		      block_index_low_acc = count;
 		    }
-        cache.at(index).at(block_index_low_acc) = new_block;
-        load_miss++;
-        total_cycles += 1 + (100 * (bytes_per_block / 4));
-      }
-      // The case for FIFO
-	    else {
+		    count++;
+		  }
+		  cache.at(index).at(block_index_low_acc) = new_block;
+		  load_miss++;
+		  total_cycles += 1 + (100 * (bytes_per_block / 4));
+		}
+		// The case for FIFO
+		else {
+		}
+	      }
 	    }
-	  }
-	}
       } else {
 	// Was not given a valid block
       }
