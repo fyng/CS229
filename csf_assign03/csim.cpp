@@ -168,7 +168,68 @@ int main (int argc, char* argv[]) {
       } else {
 	// Was not given a valid block
       }
-    } else if (action.compare("s")) {
+    } 
+    // store
+    else if (action.compare("s")) {
+
+      total_loads++;
+      // If there is no set existent yet
+      if (cache.find(index) == cache.end()) {
+        cache.insert(pair<int, vector<block>> (index, vector<block>() ));
+        cache.at(index).push_back(new_block);
+        load_miss++;
+        total_cycles += 1 + (100 * (bytes_per_block / 4));
+      }
+      // If the set exists
+      else if (cache.find(index) != cache.end()) {
+        bool hit = false;
+        for (vector<block>::iterator it = cache.at(index).begin(); it != cache.at(index).end(); ++it) {
+          if ((*it).tag == new_block.tag) {
+            hit = true;
+            (*it).num_accesses++;
+          }
+	      }
+      // If the block exists
+      if (hit) {
+        load_hits++;
+        total_cycles++;
+      }
+	    // If the block does not exist
+	    else {
+	    // If there is space
+	      if ((int) cache.at(index).size() < blocks_per_set) {
+		cache.at(index).push_back(new_block);
+		load_miss++;
+		total_cycles += 1 + (100 * (bytes_per_block / 4));
+	      }
+	      // If there is no space
+	      else {
+		// The case for lru
+		if (evic == 1) {
+		  int lowest_accesses = cache.at(index).at(0).num_accesses;
+		  int block_index_low_acc = 0;
+		  int count = 0;
+		  for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
+		    if ((*it).num_accesses < lowest_accesses) {
+		      lowest_accesses = (*it).num_accesses;
+		      block_index_low_acc = count;
+		    }
+		    count++;
+		  }
+		  cache.at(index).at(block_index_low_acc) = new_block;
+		  load_miss++;
+		  total_cycles += 1 + (100 * (bytes_per_block / 4));
+		}
+		// The case for FIFO
+		else {
+		}
+	      }
+	    }
+      } else {
+	// Was not given a valid block
+      }
+
+
 
     } else {
       // Did not read 'l' or 's'
