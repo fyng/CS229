@@ -2,6 +2,7 @@
 // Tae Wan Kim; tkim104
 #include "cfuncs.h"
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <map>
 #include <vector>
@@ -87,19 +88,18 @@ int main (int argc, char* argv[]) {
     int tag;
     int num_accesses;
     bool dirty;
-  }
+  };
   
   // Cache set up
   map<int, vector<block>> cache;
   string trace_line;
 
   while (getline(cin, trace_line)) {
-    string sl; 
+    stringstream ss(trace_line);
+    string action; 
     string addr;
-    string >> sl;
-    string >> addr;
-
-    char action = sl[0];
+    ss >> action;
+    ss >> addr;
     int address = stoi(addr, 0 , 16);
     int offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
     int index = (address << (32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(num_set));
@@ -111,31 +111,31 @@ int main (int argc, char* argv[]) {
     new_block.num_accesses = 0;
     new_block.dirty = false;
     // If loading
-    if (action.equals('l')) {
-      total_loads++:
+    if (action.compare("l")) {
+      total_loads++;
       // If there is no set existent yet
       if (cache[index] == NULL) {
-	cache.insert(pair<int, vector<block>> (index, vector<block>() ));
-	cache.at(index).push_back(new_block);
-	load_miss++;
-	total_cycles += 1 + (100 * (bytes_per_block / 4));
+        cache.insert(pair<int, vector<block>> (index, vector<block>() ));
+        cache.at(index).push_back(new_block);
+        load_miss++;
+        total_cycles += 1 + (100 * (bytes_per_block / 4));
       }
       // If the set exists
       else if (cache[index] != NULL) {
-	bool hit = false;
-	for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++it) {
-	    if ((*it).tag == new_block.tag) {
-	      hit = true;
-	      (*it).num_accesses++;
-	    }
-	  }
-	  // If the block exists
-	  if (hit) {
-	    load_hits++;
-	    total_cycles++;
-	  }
-	  // If the block does not exist
-	  else {
+        bool hit = false;
+        for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++it) {
+          if ((*it).tag == new_block.tag) {
+            hit = true;
+            (*it).num_accesses++;
+          }
+	      }
+      // If the block exists
+      if (hit) {
+        load_hits++;
+        total_cycles++;
+      }
+	    // If the block does not exist
+	    else {
 	    // If there is space
 	    if (cache[index].size() < blocks_per_set) {
 	      cache.at(index).push_back(new_block);
@@ -146,30 +146,29 @@ int main (int argc, char* argv[]) {
 	    else {
 	      // The case for lru
 	      if (evic == 1) {
-		int lowest_accesses = cache.at(index).at(0);
-		int block_index_low_acc = 0;
-		int count = 0;
-		for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
-		  if ((*it).num_accesses < lowest_accesses) {
-		    lowest_accesses = num_accesses;
-		    block_index_low_acc = count;
-		  }
-		  count++;
-		}
-		cache.at(index).at(block_index_low_acc) = new_block;
-		load_miss++;
-		total_cycles += 1 + (100 * (bytes_per_block / 4));
-	      }
-	      // The case for FIFO
-	      else {
-		
-	      }
+          int lowest_accesses = cache.at(index).at(0);
+          int block_index_low_acc = 0;
+          int count = 0;
+          for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
+            if ((*it).num_accesses < lowest_accesses) {
+              lowest_accesses = num_accesses;
+              block_index_low_acc = count;
+            }
+		      count++;
+		    }
+        cache.at(index).at(block_index_low_acc) = new_block;
+        load_miss++;
+        total_cycles += 1 + (100 * (bytes_per_block / 4));
+      }
+      // The case for FIFO
+	    else {
 	    }
 	  }
+	}
       } else {
 	// Was not given a valid block
       }
-    } else if (action.equals('s')) {
+    } else if (action.compare("s")) {
 
     } else {
       // Did not read 'l' or 's'
