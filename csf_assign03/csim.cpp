@@ -87,16 +87,19 @@ int main (int argc, char* argv[]) {
   map<int, vector<block>> cache;
   string trace_line;
 
+  // int loopctr = 0;
   while (getline(cin, trace_line)) {
+    // loopctr++;
+    // cout << loopctr << endl;
     stringstream ss(trace_line);
     string action; 
     string addr;
     ss >> action;
     ss >> addr;
-    int address = stoi(addr, 0 , 16);
-    int offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
-    int index = (address << (32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(num_set));
-    int tag = address >> (logTwo(bytes_per_block) + logTwo(num_set));
+    uint32_t address = stol(addr, 0 , 16);
+    // int offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
+    uint32_t index = (address << (32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(num_set));
+    uint32_t tag = address >> (logTwo(bytes_per_block) + logTwo(num_set));
 
     // Create the Block struct
     block new_block;
