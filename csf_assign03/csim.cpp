@@ -99,6 +99,9 @@ int main (int argc, char* argv[]) {
   string trace_line;
 
   while (getline(cin, trace_line)){
+    cout << total_cycles << endl;
+  
+    
     stringstream ss(trace_line);
     string action; 
     string addr;
@@ -142,6 +145,7 @@ int main (int argc, char* argv[]) {
         // If the block exists
         if (hit) {
           load_hits++;
+          total_cycles++;
         }
         // If the block does not exist, space
         else if (cache.at(index).set.size() < (uint32_t) blocks_per_set) {
@@ -157,7 +161,7 @@ int main (int argc, char* argv[]) {
           if (evic == 1) {
             int block_index_low_acc = 0;
             int count = 0;
-	    uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
+	          uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
             for (vector<block>::iterator it = cache[index].set.begin(); it != cache[index].set.end(); ++ it) {
 	      if ((*it).lru_count < lowest_lru_count) {
                 block_index_low_acc = count;
@@ -192,7 +196,7 @@ int main (int argc, char* argv[]) {
           new_block.lru_count = cache.at(index).lifetime_counter;
           cache.at(index).lifetime_counter++;
           cache.at(index).set.push_back(new_block);
-          total_cycles += 1 + (100 * (bytes_per_block / 4));
+          total_cycles += 100 + 1 + (100 * bytes_per_block / 4);
         }
         else if (write_alloc == 0 && write_mode == 1) {
           total_cycles += 100 * (bytes_per_block / 4);
@@ -214,13 +218,13 @@ int main (int argc, char* argv[]) {
             (*it).num_accesses++;
             (*it).lru_count = cache.at(index).lifetime_counter;
             cache.at(index).lifetime_counter++;
-	    break;
-	  }
+	          break;
+	        }
 	      }
         // If the block exists
         if (hit) {
           store_hits++;
-          total_cycles += (100 * (bytes_per_block / 4));
+          total_cycles += 1 + 100 * (bytes_per_block / 4);
         }
         // If the block does not exist, there is space
         else if (cache.at(index).set.size() < (uint32_t) blocks_per_set) {
@@ -229,7 +233,7 @@ int main (int argc, char* argv[]) {
             new_block.lru_count = cache.at(index).lifetime_counter;
             cache.at(index).lifetime_counter++;
             cache.at(index).set.push_back(new_block);
-            total_cycles += 1 + (100 * (bytes_per_block / 4));
+            total_cycles += 100 + 1 + (100 * bytes_per_block / 4);
           }
           else if (write_alloc == 0 && write_mode == 1) {
             total_cycles += 100 * (bytes_per_block / 4);
