@@ -15,10 +15,6 @@ int main (int argc, char* argv[]) {
     std::cerr << "Invalid number of input parameters.\n";
     return 1;
   }
-
-  // number of sets in the cache (a positive power-of-2)
-  // number of blocks in each set (a positive power-of-2)
-  // number of bytes in each block (a positive power-of-2, at least 4)
   
   int num_set = stoi(argv[1]);
   int blocks_per_set = stoi(argv[2]);
@@ -80,13 +76,10 @@ int main (int argc, char* argv[]) {
   int store_miss = 0;
   int total_cycles = 0;
 
-  unsigned use_ctr = 0;
-
   // Block Struct
   struct block {
-    unsigned tag;
-    unsigned access_ts = 0;
-    unsigned load_ts = 0;
+    int tag;
+    int num_accesses = 0;
     bool dirty = false;
     uint32_t lru_count;
   };
@@ -98,15 +91,8 @@ int main (int argc, char* argv[]) {
   };
   
   // Cache set up
-<<<<<<< HEAD
   map<int, Set> cache;
-=======
-  map<unsigned, vector<block>> cache;
->>>>>>> cbc439ebaabb83475e6f1d815b458cc6c3978f32
   string trace_line;
-
-  unsigned offset_size = logTwo(bytes_per_block);
-  unsigned idx_size = logTwo(num_set);
 
   while (getline(cin, trace_line)){
     stringstream ss(trace_line);
@@ -114,10 +100,10 @@ int main (int argc, char* argv[]) {
     string addr;
     ss >> action;
     ss >> addr;
-    unsigned address = stol(addr, 0 , 16);
-    // int offset = (address << (32 - offset_size)) >> (32 - offset_size);
-    unsigned index = (address << (32 - offset_size - idx_size)) >> (32 - idx_size);
-    unsigned tag = address >> (offset_size + idx_size);
+    uint32_t address = stol(addr, 0 , 16);
+    // int offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
+    uint32_t index = (address << ((32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(num_set)));
+    uint32_t tag = address >> (logTwo(bytes_per_block) + logTwo(num_set));
 
     // Create the Block struct
     block new_block;
@@ -128,33 +114,23 @@ int main (int argc, char* argv[]) {
       total_loads++;
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
-<<<<<<< HEAD
         cache.insert(pair<int, Set> (index, Set() ));
 	new_block.lru_count = cache.at(index).lifetime_counter;
 	cache.at(index).lifetime_counter++;
         cache.at(index).set.push_back(new_block);
-=======
-        cache.insert(pair<unsigned, vector<block>> (index, vector<block>() ));
-        cache.at(index).push_back(new_block);
->>>>>>> cbc439ebaabb83475e6f1d815b458cc6c3978f32
         load_miss++;
         total_cycles += 1 + (100 * (bytes_per_block / 4));
       }
 
       // If the set exists
-      else {
+      else if (cache.find(index) != cache.end()) {
         bool hit = false;
         for (vector<block>::iterator it = cache.at(index).set.begin(); it != cache.at(index).set.end(); ++it) {
           if ((*it).tag == new_block.tag) {
             hit = true;
-<<<<<<< HEAD
             (*it).num_accesses++;
 	    (*it).lru_count = cache.at(index).lifetime_counter;
 	    cache.at(index).lifetime_counter++;
-=======
-            (*it).access_ts = ++use_ctr;
-            break;
->>>>>>> cbc439ebaabb83475e6f1d815b458cc6c3978f32
           }
 	}
 
@@ -163,27 +139,18 @@ int main (int argc, char* argv[]) {
           load_hits++;
           total_cycles++;
         }
-
         // If the block does not exist, space
-<<<<<<< HEAD
         else if ((int) cache.at(index).set.size() < blocks_per_set) {
 	  new_block.lru_count = cache.at(index).lifetime_counter;
 	  cache.at(index).lifetime_counter++;
 	  cache.at(index).set.push_back(new_block);
 	  load_miss++;
 	  total_cycles += 1 + (100 * (bytes_per_block / 4));
-=======
-        else if (cache.at(index).size() < (unsigned) blocks_per_set) {
-            cache.at(index).push_back(new_block);
-            load_miss++;
-            total_cycles += 1 + (100 * (bytes_per_block / 4));
->>>>>>> cbc439ebaabb83475e6f1d815b458cc6c3978f32
         }
         // If the block does not exist,  no space
         else {
           // LRU eviction
           if (evic == 1) {
-<<<<<<< HEAD
             int block_index_low_acc = 0;
             int count = 0;
 	    uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
@@ -192,16 +159,6 @@ int main (int argc, char* argv[]) {
 		block_index_low_acc = count;
 		lowest_lru_count = (*it).lru_count;
 	      }
-=======
-            unsigned least_recent = cache.at(index).at(0).access_ts;
-            unsigned block_index_low_acc = 0;
-            unsigned count = 0;
-            for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
-              if ((*it).access_ts < least_recent) {
-                least_recent = (*it).access_ts;
-                block_index_low_acc = count;
-              }
->>>>>>> cbc439ebaabb83475e6f1d815b458cc6c3978f32
               count++;
             }
             if (cache.at(index).set.at(block_index_low_acc).dirty == true) {
@@ -223,13 +180,8 @@ int main (int argc, char* argv[]) {
       total_stores++;
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
-<<<<<<< HEAD
         cache.insert(pair<int, Set> (index, Set() ));
 	store_miss++;
-=======
-        cache.insert(pair<unsigned, vector<block>> (index, vector<block>() ));
-	      store_miss++;
->>>>>>> cbc439ebaabb83475e6f1d815b458cc6c3978f32
         if (write_alloc == 1 && write_mode == 1) {
 	  new_block.lru_count = cache.at(index).lifetime_counter;
 	  cache.at(index).lifetime_counter++;
@@ -253,14 +205,9 @@ int main (int argc, char* argv[]) {
         for (vector<block>::iterator it = cache.at(index).set.begin(); it != cache.at(index).set.end(); ++it) {
           if ((*it).tag == new_block.tag) {
             hit = true;
-<<<<<<< HEAD
             (*it).num_accesses++;
 	    (*it).lru_count = cache.at(index).lifetime_counter;
 	    cache.at(index).lifetime_counter++;
-=======
-            (*it).access_ts = ++use_ctr;
-            break;
->>>>>>> cbc439ebaabb83475e6f1d815b458cc6c3978f32
           }
 	      }
         // If the block exists
@@ -269,11 +216,7 @@ int main (int argc, char* argv[]) {
           total_cycles++;
         }
         // If the block does not exist, there is space
-<<<<<<< HEAD
         else if ((int) cache.at(index).set.size() < blocks_per_set) {
-=======
-        else if ( cache.at(index).size() < (unsigned) blocks_per_set) {
->>>>>>> cbc439ebaabb83475e6f1d815b458cc6c3978f32
           store_miss++;
           if (write_alloc == 1 && write_mode == 1) {
 	    new_block.lru_count = cache.at(index).lifetime_counter;
@@ -296,7 +239,6 @@ int main (int argc, char* argv[]) {
         else {
           // LRU eviction
           if (evic == 1) {
-<<<<<<< HEAD
             int block_index_low_acc = 0;
             int count = 0;
 	    uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
@@ -305,16 +247,6 @@ int main (int argc, char* argv[]) {
 		block_index_low_acc = count;
 		lowest_lru_count = (*it).lru_count;
 	      }
-=======
-            unsigned least_recent = cache.at(index).at(0).access_ts;
-            unsigned block_index_low_acc = 0;
-            unsigned count = 0;
-            for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
-              if ((*it).access_ts < least_recent) {
-                least_recent = (*it).access_ts;
-                block_index_low_acc = count;
-              }
->>>>>>> cbc439ebaabb83475e6f1d815b458cc6c3978f32
               count++;
             }
             if (cache.at(index).set.at(block_index_low_acc).dirty == true) {
@@ -338,16 +270,17 @@ int main (int argc, char* argv[]) {
               total_cycles++;
             }
           }
-          // TODO: The case for FIFO
+          // The case for FIFO
           else {
           }
 	      }
       }
     }
 
-    // TODO: Was not given a valid block  
+    // Was not given a valid block  
   }
-  // TODO: Did not read 'l' or 's'
+  
+  // Did not read 'l' or 's'
 
 
   // Print out parameter values asked for
