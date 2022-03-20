@@ -98,10 +98,7 @@ int main (int argc, char* argv[]) {
   map<uint32_t, Set> cache;
   string trace_line;
 
-  while (getline(cin, trace_line)){
-    cout << total_cycles << endl;
-  
-    
+  while (getline(cin, trace_line)){    
     stringstream ss(trace_line);
     string action; 
     string addr;
