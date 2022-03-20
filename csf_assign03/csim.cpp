@@ -83,7 +83,8 @@ int main (int argc, char* argv[]) {
   // Block Struct
   struct block {
     int tag;
-    int num_accesses = 0;
+    unsigned access_ts = 0;
+    unsigned load_ts = 0;
     bool dirty = false;
   };
   
@@ -93,10 +94,6 @@ int main (int argc, char* argv[]) {
 
   int offset_size = logTwo(bytes_per_block);
   int idx_size = logTwo(num_set);
-  cout << offset_size << endl;
-  cout << idx_size << endl;
-  cout << endl;
-
 
   while (getline(cin, trace_line)){
     stringstream ss(trace_line);
@@ -130,7 +127,7 @@ int main (int argc, char* argv[]) {
         for (vector<block>::iterator it = cache.at(index).begin(); it != cache.at(index).end(); ++it) {
           if ((*it).tag == new_block.tag) {
             hit = true;
-            (*it).num_accesses++;
+            (*it).access_ts++;
           }
 	      }
 
@@ -149,12 +146,12 @@ int main (int argc, char* argv[]) {
         else {
           // LRU eviction
           if (evic == 1) {
-            int lowest_accesses = cache.at(index).at(0).num_accesses;
+            int lowest_accesses = cache.at(index).at(0).access_ts;
             int block_index_low_acc = 0;
             int count = 0;
             for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
-              if ((*it).num_accesses < lowest_accesses) {
-                lowest_accesses = (*it).num_accesses;
+              if ((*it).access_ts < lowest_accesses) {
+                lowest_accesses = (*it).access_ts;
                 block_index_low_acc = count;
               }
               count++;
@@ -197,7 +194,7 @@ int main (int argc, char* argv[]) {
         for (vector<block>::iterator it = cache.at(index).begin(); it != cache.at(index).end(); ++it) {
           if ((*it).tag == new_block.tag) {
             hit = true;
-            (*it).num_accesses++;
+            (*it).access_ts++;
           }
 	      }
         // If the block exists
@@ -225,12 +222,12 @@ int main (int argc, char* argv[]) {
         else {
           // LRU eviction
           if (evic == 1) {
-            int lowest_accesses = cache.at(index).at(0).num_accesses;
+            int lowest_accesses = cache.at(index).at(0).access_ts;
             int block_index_low_acc = 0;
             int count = 0;
             for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
-              if ((*it).num_accesses < lowest_accesses) {
-                lowest_accesses = (*it).num_accesses;
+              if ((*it).access_ts < lowest_accesses) {
+                lowest_accesses = (*it).access_ts;
                 block_index_low_acc = count;
               }
               count++;

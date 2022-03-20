@@ -8,7 +8,7 @@ csim: csim.o cfuncs.o
 	$(CC) -o csim csim.o cfuncs.o -g
 	
 clean:
-	rm -f *.o csim *~
+	rm -f *.o csim *~ *.zip
 
 .PHONY: solution.zip
 solution.zip :
