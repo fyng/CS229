@@ -135,15 +135,16 @@ int main (int argc, char* argv[]) {
             (*it).num_accesses++;
             (*it).lru_count = cache.at(index).lifetime_counter;
             cache.at(index).lifetime_counter++;
-	    break;
+	          break;
           }
-	}
+	      }
 
         // If the block exists
         if (hit) {
           load_hits++;
           total_cycles++;
         }
+
         // If the block does not exist, space
         else if (cache.at(index).set.size() < (uint32_t) blocks_per_set) {
           new_block.lru_count = cache.at(index).lifetime_counter;
@@ -152,6 +153,7 @@ int main (int argc, char* argv[]) {
           load_miss++;
           total_cycles += 1 + (100 * (bytes_per_block / 4));
         }
+        
         // If the block does not exist,  no space
         else {
           // LRU eviction
@@ -160,11 +162,11 @@ int main (int argc, char* argv[]) {
             int count = 0;
 	          uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
             for (vector<block>::iterator it = cache[index].set.begin(); it != cache[index].set.end(); ++ it) {
-	      if ((*it).lru_count < lowest_lru_count) {
+	            if ((*it).lru_count < lowest_lru_count) {
                 block_index_low_acc = count;
                 lowest_lru_count = (*it).lru_count;
-		break;
-	      }
+	            	break;
+	            }
               count++;
             }
             if (cache.at(index).set.at(block_index_low_acc).dirty == true) {
