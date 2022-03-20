@@ -79,18 +79,15 @@ int main (int argc, char* argv[]) {
   // Block Struct
   struct block {
     int tag;
-    int num_accesses;
-    bool dirty;
+    int num_accesses = 0;
+    bool dirty = false;
   };
   
   // Cache set up
   map<int, vector<block>> cache;
   string trace_line;
 
-  // int loopctr = 0;
-  while (getline(cin, trace_line)) {
-    // loopctr++;
-    // cout << loopctr << endl;
+  while (getline(cin, trace_line)){
     stringstream ss(trace_line);
     string action; 
     string addr;
@@ -104,8 +101,7 @@ int main (int argc, char* argv[]) {
     // Create the Block struct
     block new_block;
     new_block.tag = tag;
-    new_block.num_accesses = 0;
-    new_block.dirty = false;
+
     // If loading
     if (action.compare("l") == 0) {
       total_loads++;
@@ -116,6 +112,7 @@ int main (int argc, char* argv[]) {
         load_miss++;
         total_cycles += 1 + (100 * (bytes_per_block / 4));
       }
+
       // If the set exists
       else if (cache.find(index) != cache.end()) {
         bool hit = false;
@@ -125,68 +122,63 @@ int main (int argc, char* argv[]) {
             (*it).num_accesses++;
           }
 	      }
-      // If the block exists
-      if (hit) {
-        load_hits++;
-        total_cycles++;
+
+        // If the block exists
+        if (hit) {
+          load_hits++;
+          total_cycles++;
+        }
+        // If the block does not exist, space
+        else if ((int) cache.at(index).size() < blocks_per_set) {
+            cache.at(index).push_back(new_block);
+            load_miss++;
+            total_cycles += 1 + (100 * (bytes_per_block / 4));
+        }
+        // If the block does not exist,  no space
+        else {
+          // LRU eviction
+          if (evic == 1) {
+            int lowest_accesses = cache.at(index).at(0).num_accesses;
+            int block_index_low_acc = 0;
+            int count = 0;
+            for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
+              if ((*it).num_accesses < lowest_accesses) {
+                lowest_accesses = (*it).num_accesses;
+                block_index_low_acc = count;
+              }
+              count++;
+            }
+            if (cache.at(index).at(block_index_low_acc).dirty == true) {
+              total_cycles += (100 * (bytes_per_block) / 4);
+            }
+            cache.at(index).at(block_index_low_acc) = new_block;
+            load_miss++;
+            total_cycles += 1 + (100 * (bytes_per_block / 4));
+          }
+          // TODO: FIFO eviction
+        }
       }
-	    // If the block does not exist
-	    else {
-	    // If there is space
-	      if ((int) cache.at(index).size() < blocks_per_set) {
-		cache.at(index).push_back(new_block);
-		load_miss++;
-		total_cycles += 1 + (100 * (bytes_per_block / 4));
-	      }
-	      // If there is no space
-	      else {
-		// The case for lru
-		if (evic == 1) {
-		  int lowest_accesses = cache.at(index).at(0).num_accesses;
-		  int block_index_low_acc = 0;
-		  int count = 0;
-		  for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
-		    if ((*it).num_accesses < lowest_accesses) {
-		      lowest_accesses = (*it).num_accesses;
-		      block_index_low_acc = count;
-		    }
-		    count++;
-		  }
-		  if (cache.at(index).at(block_index_low_acc).dirty == true) {
-		    total_cycles += (100 * (bytes_per_block) / 4);
-		  }
-		  cache.at(index).at(block_index_low_acc) = new_block;
-		  load_miss++;
-		  total_cycles += 1 + (100 * (bytes_per_block / 4));
-		}
-		// The case for FIFO
-		else {
-		}
-	      }
-	    }
-      } else {
-	// Was not given a valid block
-      }
-    } 
+	  }
+
     // store
     else if (action.compare("s") == 0) {
       total_stores++;
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
         cache.insert(pair<int, vector<block>> (index, vector<block>() ));
-	store_miss++;
-	if (write_alloc == 1 && write_mode == 1) {
-	  cache.at(index).push_back(new_block);
-	  total_cycles += 1 + (100 * (bytes_per_block / 4));
-	}
-	else if (write_alloc == 0 && write_mode == 1) {
-	  total_cycles += 100 * (bytes_per_block / 4);
-	}
-	else {
-	  new_block.dirty = true;
-	  cache.at(index).push_back(new_block);
-	  total_cycles++;
-	}
+	      store_miss++;
+        if (write_alloc == 1 && write_mode == 1) {
+          cache.at(index).push_back(new_block);
+          total_cycles += 1 + (100 * (bytes_per_block / 4));
+        }
+        else if (write_alloc == 0 && write_mode == 1) {
+          total_cycles += 100 * (bytes_per_block / 4);
+        }
+        else {
+          new_block.dirty = true;
+          cache.at(index).push_back(new_block);
+          total_cycles++;
+        }
       }
       // If the set exists
       else if (cache.find(index) != cache.end()) {
@@ -197,76 +189,70 @@ int main (int argc, char* argv[]) {
             (*it).num_accesses++;
           }
 	      }
-      // If the block exists
-      if (hit) {
-        store_hits++;
-        total_cycles++;
+        // If the block exists
+        if (hit) {
+          store_hits++;
+          total_cycles++;
+        }
+        // If the block does not exist, there is space
+        else if ((int) cache.at(index).size() < blocks_per_set) {
+          store_miss++;
+          if (write_alloc == 1 && write_mode == 1) {
+            cache.at(index).push_back(new_block);
+            total_cycles += 1 + (100 * (bytes_per_block / 4));
+          }
+          else if (write_alloc == 0 && write_mode == 1) {
+            total_cycles += 100 * (bytes_per_block / 4);
+          }
+          else {
+            new_block.dirty = true;
+            cache.at(index).push_back(new_block);
+            total_cycles++;
+          }
+        }
+        // If the block does not exist, there is no space
+        else {
+          // LRU eviction
+          if (evic == 1) {
+            int lowest_accesses = cache.at(index).at(0).num_accesses;
+            int block_index_low_acc = 0;
+            int count = 0;
+            for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
+              if ((*it).num_accesses < lowest_accesses) {
+                lowest_accesses = (*it).num_accesses;
+                block_index_low_acc = count;
+              }
+              count++;
+            }
+            if (cache.at(index).at(block_index_low_acc).dirty == true) {
+              total_cycles += 100 * (bytes_per_block / 4);
+            }
+            store_miss++;
+            if (write_alloc == 1 && write_mode == 1) {
+              cache.at(index).push_back(new_block);
+              total_cycles += 1 + (100 * (bytes_per_block / 4));
+            }
+            else if (write_alloc == 0 && write_mode == 1) {
+              total_cycles += 100 * (bytes_per_block / 4);
+            }
+            else {
+              new_block.dirty = true;
+              cache.at(index).push_back(new_block);
+              total_cycles++;
+            }
+          }
+          // The case for FIFO
+          else {
+          }
+	      }
       }
-	    // If the block does not exist
-	    else {
-	    // If there is space
-	      if ((int) cache.at(index).size() < blocks_per_set) {
-		store_miss++;
-		if (write_alloc == 1 && write_mode == 1) {
-		  cache.at(index).push_back(new_block);
-		  total_cycles += 1 + (100 * (bytes_per_block / 4));
-		}
-		else if (write_alloc == 0 && write_mode == 1) {
-		  total_cycles += 100 * (bytes_per_block / 4);
-		}
-		else {
-		  new_block.dirty = true;
-		  cache.at(index).push_back(new_block);
-		  total_cycles++;
-		}
-	      }
-	      // If there is no space
-	      else {
-		// The case for lru
-		if (evic == 1) {
-		  int lowest_accesses = cache.at(index).at(0).num_accesses;
-		  int block_index_low_acc = 0;
-		  int count = 0;
-		  for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
-		    if ((*it).num_accesses < lowest_accesses) {
-		      lowest_accesses = (*it).num_accesses;
-		      block_index_low_acc = count;
-		    }
-		    count++;
-		  }
-		  if (cache.at(index).at(block_index_low_acc).dirty == true) {
-		    total_cycles += 100 * (bytes_per_block / 4);
-		  }
-		store_miss++;
-                if (write_alloc == 1 && write_mode == 1) {
-                  cache.at(index).push_back(new_block);
-                  total_cycles += 1 + (100 * (bytes_per_block / 4));
-                }
-                else if (write_alloc == 0 && write_mode == 1) {
-                  total_cycles += 100 * (bytes_per_block / 4);
-                }
-                else {
-                  new_block.dirty = true;
-                  cache.at(index).push_back(new_block);
-                  total_cycles++;
-                }
-		
-	      }
-	      // The case for FIFO
-	      else {
-	      }
-	    }
-      }
-    } else {
-      // Was not given a valid block
     }
 
-    
-    
-  } else {
-    // Did not read 'l' or 's'
+    // Was not given a valid block  
   }
-}
+  
+  // Did not read 'l' or 's'
+
 
   // Print out parameter values asked for
   cout << "Total loads: " << total_loads << endl;
