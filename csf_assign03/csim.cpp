@@ -129,9 +129,9 @@ int main (int argc, char* argv[]) {
       // If the set exists
       else if (cache.find(index) != cache.end()) {
         bool hit = false;
-	int block_index_low_acc = 0;
-	int count = 0;
-	uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
+        int block_index_low_acc = 0;
+        int count = 0;
+        uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
         for (vector<block>::iterator it = cache.at(index).set.begin(); it != cache.at(index).set.end(); ++it) {
           if ((*it).tag == new_block.tag) {
             hit = true;
@@ -139,12 +139,12 @@ int main (int argc, char* argv[]) {
             (*it).lru_count = cache.at(index).lifetime_counter;
             cache.at(index).lifetime_counter++;
           }
-	  if ((*it).lru_count < lowest_lru_count) {
-	    block_index_low_acc = count;
-	    lowest_lru_count = (*it).lru_count;
-	  }
-	  count++;
-	}
+          if ((*it).lru_count < lowest_lru_count) {
+            block_index_low_acc = count;
+            lowest_lru_count = (*it).lru_count;
+          }
+          count++;
+        }
 	
         // If the block exists
         if (hit) {

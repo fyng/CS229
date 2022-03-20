@@ -1,5 +1,5 @@
 CC = c++
-CFLAGS = -std=c++11 -pedantic -Wall -Wextra
+CFLAGS = -std=c++11 -pedantic -Wall -Wextra -O2
 
 %.o : %.cpp
 	gcc $(CFLAGS) -c $<
