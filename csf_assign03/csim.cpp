@@ -72,30 +72,30 @@ int main (int argc, char* argv[]) {
   }
   
   // Parameters to keep track of and print
-  int total_loads = 0;
-  int total_stores = 0;
-  int load_hits = 0;
-  int load_miss = 0;
-  int store_hits = 0;
-  int store_miss = 0;
-  int total_cycles = 0;
+  unsigned total_loads = 0;
+  unsigned total_stores = 0;
+  unsigned load_hits = 0;
+  unsigned load_miss = 0;
+  unsigned store_hits = 0;
+  unsigned store_miss = 0;
+  unsigned total_cycles = 0;
 
   // Block Struct
   struct block {
-    int tag;
-    int num_accesses = 0;
+    unsigned tag;
+    unsigned num_accesses = 0;
     bool dirty = false;
-    uint32_t lru_count;
+    unsigned lru_count;
   };
 
   // Set Struct
   struct Set {
     vector<block> set;
-    uint32_t lifetime_counter = 0;
+    unsigned lifetime_counter = 0;
   };
   
   // Cache set up
-  map<int, Set> cache;
+  map<unsigned, Set> cache;
   string trace_line;
 
   while (getline(cin, trace_line)){
@@ -104,10 +104,10 @@ int main (int argc, char* argv[]) {
     string addr;
     ss >> action;
     ss >> addr;
-    uint32_t address = stol(addr, 0 , 16);
+    unsigned address = stol(addr, 0 , 16);
     // int offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
-    uint32_t index = (address << ((32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(num_set)));
-    uint32_t tag = address >> (logTwo(bytes_per_block) + logTwo(num_set));
+    unsigned index = (address << ((32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(num_set)));
+    unsigned tag = address >> (logTwo(bytes_per_block) + logTwo(num_set));
 
     // Create the Block struct
     block new_block;
@@ -118,7 +118,7 @@ int main (int argc, char* argv[]) {
       total_loads++;
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
-        cache.insert(pair<int, Set> (index, Set() ));
+        cache.insert(pair<unsigned, Set> (index, Set() ));
         new_block.lru_count = cache.at(index).lifetime_counter;
         cache.at(index).lifetime_counter++;
         cache.at(index).set.push_back(new_block);
@@ -144,7 +144,7 @@ int main (int argc, char* argv[]) {
           total_cycles++;
         }
         // If the block does not exist, space
-        else if ((int) cache.at(index).set.size() < blocks_per_set) {
+        else if (cache.at(index).set.size() < (unsigned) blocks_per_set) {
           new_block.lru_count = cache.at(index).lifetime_counter;
           cache.at(index).lifetime_counter++;
           cache.at(index).set.push_back(new_block);
@@ -157,7 +157,7 @@ int main (int argc, char* argv[]) {
           if (evic == 1) {
             int block_index_low_acc = 0;
             int count = 0;
-	          uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
+	          unsigned lowest_lru_count = cache.at(index).set.at(0).lru_count;
             for (vector<block>::iterator it = cache[index].set.begin(); it != cache[index].set.end(); ++ it) {
 	            if ((*it).lru_count < lowest_lru_count) {
                 block_index_low_acc = count;
@@ -184,7 +184,7 @@ int main (int argc, char* argv[]) {
       total_stores++;
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
-        cache.insert(pair<int, Set> (index, Set() ));
+        cache.insert(pair<unsigned, Set> (index, Set() ));
 	      store_miss++; 
         if (write_alloc == 1 && write_mode == 1) {
           new_block.lru_count = cache.at(index).lifetime_counter;
@@ -220,7 +220,7 @@ int main (int argc, char* argv[]) {
           total_cycles++;
         }
         // If the block does not exist, there is space
-        else if ((int) cache.at(index).set.size() < blocks_per_set) {
+        else if (cache.at(index).set.size() < (unsigned) blocks_per_set) {
           store_miss++;
           if (write_alloc == 1 && write_mode == 1) {
             new_block.lru_count = cache.at(index).lifetime_counter;
@@ -243,8 +243,8 @@ int main (int argc, char* argv[]) {
         else {
           // LRU eviction
           if (evic == 1) {
-            int block_index_low_acc = 0;
-            int count = 0;
+            unsigned block_index_low_acc = 0;
+            unsigned count = 0;
 	    uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
             for (vector<block>::iterator it = cache[index].set.begin(); it != cache[index].set.end(); ++ it) {
 	           if ((*it).lru_count < lowest_lru_count) {
