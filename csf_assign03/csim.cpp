@@ -95,8 +95,13 @@ int main (int argc, char* argv[]) {
     ss >> addr;
     uint32_t address = stol(addr, 0 , 16);
     // int offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
-    uint32_t index = (address << ((32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(num_set)));
+    uint32_t index = (address << ((32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(num_set));
     uint32_t tag = address >> (logTwo(bytes_per_block) + logTwo(num_set));
+
+    cout << address << endl;
+    cout << index << endl;
+    cout << tag << endl;
+    cout << endl;
 
     // Create the Block struct
     block new_block;
@@ -250,7 +255,6 @@ int main (int argc, char* argv[]) {
 
     // Was not given a valid block  
   }
-  
   // Did not read 'l' or 's'
 
 
