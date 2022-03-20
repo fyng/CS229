@@ -84,18 +84,18 @@ int main (int argc, char* argv[]) {
 
   // Block Struct
   struct block {
-    int tag;
+    unsigned tag;
     unsigned access_ts = 0;
     unsigned load_ts = 0;
     bool dirty = false;
   };
   
   // Cache set up
-  map<int, vector<block>> cache;
+  map<unsigned, vector<block>> cache;
   string trace_line;
 
-  int offset_size = logTwo(bytes_per_block);
-  int idx_size = logTwo(num_set);
+  unsigned offset_size = logTwo(bytes_per_block);
+  unsigned idx_size = logTwo(num_set);
 
   while (getline(cin, trace_line)){
     stringstream ss(trace_line);
@@ -103,10 +103,10 @@ int main (int argc, char* argv[]) {
     string addr;
     ss >> action;
     ss >> addr;
-    uint32_t address = stol(addr, 0 , 16);
+    unsigned address = stol(addr, 0 , 16);
     // int offset = (address << (32 - offset_size)) >> (32 - offset_size);
-    uint32_t index = (address << (32 - offset_size - idx_size)) >> (32 - idx_size);
-    uint32_t tag = address >> (offset_size + idx_size);
+    unsigned index = (address << (32 - offset_size - idx_size)) >> (32 - idx_size);
+    unsigned tag = address >> (offset_size + idx_size);
 
     // Create the Block struct
     block new_block;
@@ -117,14 +117,14 @@ int main (int argc, char* argv[]) {
       total_loads++;
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
-        cache.insert(pair<int, vector<block>> (index, vector<block>() ));
+        cache.insert(pair<unsigned, vector<block>> (index, vector<block>() ));
         cache.at(index).push_back(new_block);
         load_miss++;
         total_cycles += 1 + (100 * (bytes_per_block / 4));
       }
 
       // If the set exists
-      else if (cache.find(index) != cache.end()) {
+      else {
         bool hit = false;
         for (vector<block>::iterator it = cache.at(index).begin(); it != cache.at(index).end(); ++it) {
           if ((*it).tag == new_block.tag) {
@@ -139,8 +139,9 @@ int main (int argc, char* argv[]) {
           load_hits++;
           total_cycles++;
         }
+
         // If the block does not exist, space
-        else if ((int) cache.at(index).size() < blocks_per_set) {
+        else if (cache.at(index).size() < (unsigned) blocks_per_set) {
             cache.at(index).push_back(new_block);
             load_miss++;
             total_cycles += 1 + (100 * (bytes_per_block / 4));
@@ -150,8 +151,8 @@ int main (int argc, char* argv[]) {
           // LRU eviction
           if (evic == 1) {
             unsigned least_recent = cache.at(index).at(0).access_ts;
-            int block_index_low_acc = 0;
-            int count = 0;
+            unsigned block_index_low_acc = 0;
+            unsigned count = 0;
             for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
               if ((*it).access_ts < least_recent) {
                 least_recent = (*it).access_ts;
@@ -176,7 +177,7 @@ int main (int argc, char* argv[]) {
       total_stores++;
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
-        cache.insert(pair<int, vector<block>> (index, vector<block>() ));
+        cache.insert(pair<unsigned, vector<block>> (index, vector<block>() ));
 	      store_miss++;
         if (write_alloc == 1 && write_mode == 1) {
           cache.at(index).push_back(new_block);
@@ -207,7 +208,7 @@ int main (int argc, char* argv[]) {
           total_cycles++;
         }
         // If the block does not exist, there is space
-        else if ((int) cache.at(index).size() < blocks_per_set) {
+        else if ( cache.at(index).size() < (unsigned) blocks_per_set) {
           store_miss++;
           if (write_alloc == 1 && write_mode == 1) {
             cache.at(index).push_back(new_block);
@@ -227,8 +228,8 @@ int main (int argc, char* argv[]) {
           // LRU eviction
           if (evic == 1) {
             unsigned least_recent = cache.at(index).at(0).access_ts;
-            int block_index_low_acc = 0;
-            int count = 0;
+            unsigned block_index_low_acc = 0;
+            unsigned count = 0;
             for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
               if ((*it).access_ts < least_recent) {
                 least_recent = (*it).access_ts;
@@ -253,16 +254,16 @@ int main (int argc, char* argv[]) {
               total_cycles++;
             }
           }
-          // The case for FIFO
+          // TODO: The case for FIFO
           else {
           }
 	      }
       }
     }
 
-    // Was not given a valid block  
+    // TODO: Was not given a valid block  
   }
-  // Did not read 'l' or 's'
+  // TODO: Did not read 'l' or 's'
 
 
   // Print out parameter values asked for
