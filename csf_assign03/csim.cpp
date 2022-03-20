@@ -186,7 +186,8 @@ int main (int argc, char* argv[]) {
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
         cache.insert(pair<uint32_t, Set> (index, Set() ));
-	store_miss++; 
+	      store_miss++; 
+        // write allocate, write through
         if (write_alloc == 1 && write_mode == 1) {
           new_block.lru_count = cache.at(index).lifetime_counter;
           cache.at(index).lifetime_counter++;
