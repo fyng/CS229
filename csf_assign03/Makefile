@@ -1,12 +1,11 @@
 CC = c++
-CFLAGS = -std=c++11 -pedantic -Wall -Wextra
+CFLAGS = -std=c++11 -pedantic -Wall -Wextra -O2 
 
 %.o : %.cpp
 	gcc $(CFLAGS) -c $<
 
 csim: csim.o cfuncs.o
 	$(CC) -o csim csim.o cfuncs.o -g
-	
 clean:
 	rm -f *.o csim *~ *.zip
 

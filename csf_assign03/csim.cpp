@@ -125,6 +125,9 @@ int main (int argc, char* argv[]) {
       // If the set exists
       else if (cache.find(index) != cache.end()) {
         bool hit = false;
+	int block_index_low_acc = 0;
+	int count = 0;
+	uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
         for (vector<block>::iterator it = cache.at(index).set.begin(); it != cache.at(index).set.end(); ++it) {
           if ((*it).tag == new_block.tag) {
             hit = true;
@@ -132,6 +135,11 @@ int main (int argc, char* argv[]) {
 	    (*it).lru_count = cache.at(index).lifetime_counter;
 	    cache.at(index).lifetime_counter++;
           }
+	  if ((*it).lru_count < lowest_lru_count) {
+	    lowest_lru_count = (*it).lru_count;
+	    block_index_low_acc = count;
+	  }
+	  count++;
 	}
 
         // If the block exists
@@ -151,16 +159,6 @@ int main (int argc, char* argv[]) {
         else {
           // LRU eviction
           if (evic == 1) {
-            int block_index_low_acc = 0;
-            int count = 0;
-	    uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
-            for (vector<block>::iterator it = cache[index].set.begin(); it != cache[index].set.end(); ++ it) {
-	      if ((*it).lru_count < lowest_lru_count) {
-		block_index_low_acc = count;
-		lowest_lru_count = (*it).lru_count;
-	      }
-              count++;
-            }
             if (cache.at(index).set.at(block_index_low_acc).dirty == true) {
               total_cycles += (100 * (bytes_per_block) / 4);
             }
@@ -202,6 +200,9 @@ int main (int argc, char* argv[]) {
       // If the set exists
       else if (cache.find(index) != cache.end()) {
         bool hit = false;
+	int block_index_low_acc = 0;
+	int count = 0;
+	uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
         for (vector<block>::iterator it = cache.at(index).set.begin(); it != cache.at(index).set.end(); ++it) {
           if ((*it).tag == new_block.tag) {
             hit = true;
@@ -209,7 +210,12 @@ int main (int argc, char* argv[]) {
 	    (*it).lru_count = cache.at(index).lifetime_counter;
 	    cache.at(index).lifetime_counter++;
           }
-	      }
+	  if ((*it).lru_count < lowest_lru_count) {
+	    lowest_lru_count = (*it).lru_count;
+	    block_index_low_acc = count;
+	  }
+	  count++;
+	}
         // If the block exists
         if (hit) {
           store_hits++;
@@ -239,16 +245,6 @@ int main (int argc, char* argv[]) {
         else {
           // LRU eviction
           if (evic == 1) {
-            int block_index_low_acc = 0;
-            int count = 0;
-	    uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
-            for (vector<block>::iterator it = cache[index].set.begin(); it != cache[index].set.end(); ++ it) {
-	      if ((*it).lru_count < lowest_lru_count) {
-		block_index_low_acc = count;
-		lowest_lru_count = (*it).lru_count;
-	      }
-              count++;
-            }
             if (cache.at(index).set.at(block_index_low_acc).dirty == true) {
               total_cycles += 100 * (bytes_per_block / 4);
             }
