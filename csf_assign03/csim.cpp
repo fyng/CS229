@@ -15,6 +15,10 @@ int main (int argc, char* argv[]) {
     std::cerr << "Invalid number of input parameters.\n";
     return 1;
   }
+
+  // number of sets in the cache (a positive power-of-2)
+  // number of blocks in each set (a positive power-of-2)
+  // number of bytes in each block (a positive power-of-2, at least 4)
   
   int num_set = stoi(argv[1]);
   int blocks_per_set = stoi(argv[2]);
@@ -87,6 +91,13 @@ int main (int argc, char* argv[]) {
   map<int, vector<block>> cache;
   string trace_line;
 
+  int offset_size = logTwo(bytes_per_block);
+  int idx_size = logTwo(num_set);
+  cout << offset_size << endl;
+  cout << idx_size << endl;
+  cout << endl;
+
+
   while (getline(cin, trace_line)){
     stringstream ss(trace_line);
     string action; 
@@ -94,14 +105,9 @@ int main (int argc, char* argv[]) {
     ss >> action;
     ss >> addr;
     uint32_t address = stol(addr, 0 , 16);
-    // int offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
-    uint32_t index = (address << ((32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(num_set));
-    uint32_t tag = address >> (logTwo(bytes_per_block) + logTwo(num_set));
-
-    cout << address << endl;
-    cout << index << endl;
-    cout << tag << endl;
-    cout << endl;
+    // int offset = (address << (32 - offset_size)) >> (32 - offset_size);
+    uint32_t index = (address << (32 - offset_size - idx_size)) >> (32 - idx_size);
+    uint32_t tag = address >> (offset_size + idx_size);
 
     // Create the Block struct
     block new_block;
