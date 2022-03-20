@@ -80,6 +80,8 @@ int main (int argc, char* argv[]) {
   int store_miss = 0;
   int total_cycles = 0;
 
+  unsigned use_ctr = 0;
+
   // Block Struct
   struct block {
     int tag;
@@ -127,7 +129,8 @@ int main (int argc, char* argv[]) {
         for (vector<block>::iterator it = cache.at(index).begin(); it != cache.at(index).end(); ++it) {
           if ((*it).tag == new_block.tag) {
             hit = true;
-            (*it).access_ts++;
+            (*it).access_ts = ++use_ctr;
+            break;
           }
 	      }
 
@@ -146,12 +149,12 @@ int main (int argc, char* argv[]) {
         else {
           // LRU eviction
           if (evic == 1) {
-            int lowest_accesses = cache.at(index).at(0).access_ts;
+            unsigned least_recent = cache.at(index).at(0).access_ts;
             int block_index_low_acc = 0;
             int count = 0;
             for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
-              if ((*it).access_ts < lowest_accesses) {
-                lowest_accesses = (*it).access_ts;
+              if ((*it).access_ts < least_recent) {
+                least_recent = (*it).access_ts;
                 block_index_low_acc = count;
               }
               count++;
@@ -194,7 +197,8 @@ int main (int argc, char* argv[]) {
         for (vector<block>::iterator it = cache.at(index).begin(); it != cache.at(index).end(); ++it) {
           if ((*it).tag == new_block.tag) {
             hit = true;
-            (*it).access_ts++;
+            (*it).access_ts = ++use_ctr;
+            break;
           }
 	      }
         // If the block exists
@@ -222,12 +226,12 @@ int main (int argc, char* argv[]) {
         else {
           // LRU eviction
           if (evic == 1) {
-            int lowest_accesses = cache.at(index).at(0).access_ts;
+            unsigned least_recent = cache.at(index).at(0).access_ts;
             int block_index_low_acc = 0;
             int count = 0;
             for (vector<block>::iterator it = cache[index].begin(); it != cache[index].end(); ++ it) {
-              if ((*it).access_ts < lowest_accesses) {
-                lowest_accesses = (*it).access_ts;
+              if ((*it).access_ts < least_recent) {
+                least_recent = (*it).access_ts;
                 block_index_low_acc = count;
               }
               count++;
