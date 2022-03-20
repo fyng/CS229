@@ -16,10 +16,6 @@ int main (int argc, char* argv[]) {
     return 1;
   }
   
-  // number of sets in the cache (a positive power-of-2)
-  // number of blocks in each set (a positive power-of-2)
-  // number of bytes in each block (a positive power-of-2, at least 4)
-  
   int num_set = stoi(argv[1]);
   int blocks_per_set = stoi(argv[2]);
   int bytes_per_block = stoi(argv[3]);
@@ -72,18 +68,18 @@ int main (int argc, char* argv[]) {
   }
   
   // Parameters to keep track of and print
-  uint32_t total_loads = 0;
-  uint32_t total_stores = 0;
-  uint32_t load_hits = 0;
-  uint32_t load_miss = 0;
-  uint32_t store_hits = 0;
-  uint32_t store_miss = 0;
-  uint32_t total_cycles = 0;
+  int total_loads = 0;
+  int total_stores = 0;
+  int load_hits = 0;
+  int load_miss = 0;
+  int store_hits = 0;
+  int store_miss = 0;
+  int total_cycles = 0;
 
   // Block Struct
   struct block {
-    uint32_t tag;
-    uint32_t num_accesses = 0;
+    int tag;
+    int num_accesses = 0;
     bool dirty = false;
     uint32_t lru_count;
   };
@@ -95,10 +91,10 @@ int main (int argc, char* argv[]) {
   };
   
   // Cache set up
-  map<uint32_t, Set> cache;
+  map<int, Set> cache;
   string trace_line;
 
-  while (getline(cin, trace_line)){    
+  while (getline(cin, trace_line)){
     stringstream ss(trace_line);
     string action; 
     string addr;
@@ -118,9 +114,9 @@ int main (int argc, char* argv[]) {
       total_loads++;
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
-        cache.insert(pair<uint32_t, Set> (index, Set() ));
-        new_block.lru_count = cache.at(index).lifetime_counter;
-        cache.at(index).lifetime_counter++;
+        cache.insert(pair<int, Set> (index, Set() ));
+	new_block.lru_count = cache.at(index).lifetime_counter;
+	cache.at(index).lifetime_counter++;
         cache.at(index).set.push_back(new_block);
         load_miss++;
         total_cycles += 1 + (100 * (bytes_per_block / 4));
@@ -129,47 +125,47 @@ int main (int argc, char* argv[]) {
       // If the set exists
       else if (cache.find(index) != cache.end()) {
         bool hit = false;
-        int block_index_low_acc = 0;
-        int count = 0;
-        uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
         for (vector<block>::iterator it = cache.at(index).set.begin(); it != cache.at(index).set.end(); ++it) {
           if ((*it).tag == new_block.tag) {
             hit = true;
             (*it).num_accesses++;
-            (*it).lru_count = cache.at(index).lifetime_counter;
-            cache.at(index).lifetime_counter++;
+	    (*it).lru_count = cache.at(index).lifetime_counter;
+	    cache.at(index).lifetime_counter++;
           }
-          if ((*it).lru_count < lowest_lru_count) {
-            block_index_low_acc = count;
-            lowest_lru_count = (*it).lru_count;
-          }
-          count++;
-        }
-	
+	}
+
         // If the block exists
         if (hit) {
           load_hits++;
           total_cycles++;
         }
-
         // If the block does not exist, space
-        else if (cache.at(index).set.size() < (uint32_t) blocks_per_set) {
-          new_block.lru_count = cache.at(index).lifetime_counter;
-          cache.at(index).lifetime_counter++;
-          cache.at(index).set.push_back(new_block);
-          load_miss++;
-          total_cycles += 1 + (100 * (bytes_per_block / 4));
+        else if ((int) cache.at(index).set.size() < blocks_per_set) {
+	  new_block.lru_count = cache.at(index).lifetime_counter;
+	  cache.at(index).lifetime_counter++;
+	  cache.at(index).set.push_back(new_block);
+	  load_miss++;
+	  total_cycles += 1 + (100 * (bytes_per_block / 4));
         }
-        
         // If the block does not exist,  no space
         else {
           // LRU eviction
           if (evic == 1) {
+            int block_index_low_acc = 0;
+            int count = 0;
+	    uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
+            for (vector<block>::iterator it = cache[index].set.begin(); it != cache[index].set.end(); ++ it) {
+	      if ((*it).lru_count < lowest_lru_count) {
+		block_index_low_acc = count;
+		lowest_lru_count = (*it).lru_count;
+	      }
+              count++;
+            }
             if (cache.at(index).set.at(block_index_low_acc).dirty == true) {
               total_cycles += (100 * (bytes_per_block) / 4);
             }
-            new_block.lru_count = cache.at(index).lifetime_counter;
-            cache.at(index).lifetime_counter++;
+	    new_block.lru_count = cache.at(index).lifetime_counter;
+	    cache.at(index).lifetime_counter++;
             cache.at(index).set.at(block_index_low_acc) = new_block;
             load_miss++;
             total_cycles += 1 + (100 * (bytes_per_block / 4));
@@ -184,22 +180,21 @@ int main (int argc, char* argv[]) {
       total_stores++;
       // If there is no set existent yet
       if (cache.find(index) == cache.end()) {
-        cache.insert(pair<uint32_t, Set> (index, Set() ));
-	      store_miss++; 
-        // write allocate, write through
+        cache.insert(pair<int, Set> (index, Set() ));
+	store_miss++;
         if (write_alloc == 1 && write_mode == 1) {
-          new_block.lru_count = cache.at(index).lifetime_counter;
-          cache.at(index).lifetime_counter++;
+	  new_block.lru_count = cache.at(index).lifetime_counter;
+	  cache.at(index).lifetime_counter++;
           cache.at(index).set.push_back(new_block);
-          total_cycles += 100 + 1 + (100 * bytes_per_block / 4);
+          total_cycles += 1 + (100 * (bytes_per_block / 4));
         }
         else if (write_alloc == 0 && write_mode == 1) {
           total_cycles += 100 * (bytes_per_block / 4);
         }
         else {
           new_block.dirty = true;
-          new_block.lru_count = cache.at(index).lifetime_counter;
-          cache.at(index).lifetime_counter++;
+	  new_block.lru_count = cache.at(index).lifetime_counter;
+	  cache.at(index).lifetime_counter++;
           cache.at(index).set.push_back(new_block);
           total_cycles++;
         }
@@ -207,43 +202,35 @@ int main (int argc, char* argv[]) {
       // If the set exists
       else if (cache.find(index) != cache.end()) {
         bool hit = false;
-	int block_index_low_acc = 0;
-        int count = 0;
-        uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
         for (vector<block>::iterator it = cache.at(index).set.begin(); it != cache.at(index).set.end(); ++it) {
           if ((*it).tag == new_block.tag) {
             hit = true;
             (*it).num_accesses++;
-            (*it).lru_count = cache.at(index).lifetime_counter;
-            cache.at(index).lifetime_counter++;
-	  }
-	  if ((*it).lru_count < lowest_lru_count) {
-	    block_index_low_acc = count;
-	    lowest_lru_count = (*it).lru_count;
-	  }
-	  count++;
-	}
+	    (*it).lru_count = cache.at(index).lifetime_counter;
+	    cache.at(index).lifetime_counter++;
+          }
+	      }
         // If the block exists
         if (hit) {
           store_hits++;
-          total_cycles += 1 + 100 * (bytes_per_block / 4);
+          total_cycles++;
         }
         // If the block does not exist, there is space
-        else if (cache.at(index).set.size() < (uint32_t) blocks_per_set) {
+        else if ((int) cache.at(index).set.size() < blocks_per_set) {
           store_miss++;
           if (write_alloc == 1 && write_mode == 1) {
-            new_block.lru_count = cache.at(index).lifetime_counter;
-            cache.at(index).lifetime_counter++;
+	    new_block.lru_count = cache.at(index).lifetime_counter;
+	    cache.at(index).lifetime_counter++;
             cache.at(index).set.push_back(new_block);
-            total_cycles += 100 + 1 + (100 * bytes_per_block / 4);
+            total_cycles += 1 + (100 * (bytes_per_block / 4));
           }
           else if (write_alloc == 0 && write_mode == 1) {
             total_cycles += 100 * (bytes_per_block / 4);
           }
           else {
             new_block.dirty = true;
-            new_block.lru_count = cache.at(index).lifetime_counter;
-            cache.at(index).lifetime_counter++;
+	    new_block.lru_count = cache.at(index).lifetime_counter;
+	    cache.at(index).lifetime_counter++;
             cache.at(index).set.push_back(new_block);
             total_cycles++;
           }
@@ -252,13 +239,23 @@ int main (int argc, char* argv[]) {
         else {
           // LRU eviction
           if (evic == 1) {
+            int block_index_low_acc = 0;
+            int count = 0;
+	    uint32_t lowest_lru_count = cache.at(index).set.at(0).lru_count;
+            for (vector<block>::iterator it = cache[index].set.begin(); it != cache[index].set.end(); ++ it) {
+	      if ((*it).lru_count < lowest_lru_count) {
+		block_index_low_acc = count;
+		lowest_lru_count = (*it).lru_count;
+	      }
+              count++;
+            }
             if (cache.at(index).set.at(block_index_low_acc).dirty == true) {
               total_cycles += 100 * (bytes_per_block / 4);
             }
             store_miss++;
             if (write_alloc == 1 && write_mode == 1) {
-              new_block.lru_count = cache.at(index).lifetime_counter;
-              cache.at(index).lifetime_counter++;
+	      new_block.lru_count = cache.at(index).lifetime_counter;
+	      cache.at(index).lifetime_counter++;
               cache.at(index).set.at(block_index_low_acc) = new_block;
               total_cycles += 1 + (100 * (bytes_per_block / 4));
             }
@@ -267,8 +264,8 @@ int main (int argc, char* argv[]) {
             }
             else {
               new_block.dirty = true;
-              new_block.lru_count = cache.at(index).lifetime_counter;
-              cache.at(index).lifetime_counter++;
+	      new_block.lru_count = cache.at(index).lifetime_counter;
+	      cache.at(index).lifetime_counter++;
               cache.at(index).set.at(block_index_low_acc) = new_block;
               total_cycles++;
             }
