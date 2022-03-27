@@ -2,6 +2,8 @@
 // Tae Wan Kim; tkim104
 #ifndef CFUNCS_H
 #define CFUNCS_H
+#include <cstdint>
+#include <vector>
 
 struct CacheParam {
   unsigned num_set = 0;
@@ -23,28 +25,30 @@ struct Stats {
   uint32_t store_hits = 0;
   uint32_t store_miss = 0;
   uint32_t total_cycles = 0;
-}
+};
 
 // Block Struct
 struct Block {
-  uint32_t tag;
+  uint32_t tag = 0;
   bool valid = false;
   bool dirty = false;
-  int num_accesses = 0;
-  uint32_t access_ts = 0;
+  uint32_t load_ts = 0; // FIFO
+  uint32_t access_ts = 0; // LRU
 };
 
-// Set Struct
-struct Set {
-  vector<Block> block;
-  // uint32_t lifetime_counter = 0;
-};
+// // Set Struct
+// struct Set {
+//   vector<Block> block;
+//   // uint32_t lifetime_counter = 0;
+// };
 
 struct Cache {
-  map <int, Set> sets;
-  CacheParam param;
-  unsigned cur_ts;
-  Stats stats;
+  std::vector<std::vector<Block>> sets;
+  CacheParam* param;
+  unsigned cur_ts = 0;
+  Stats* stats;
+  Cache(int num_set, int blocks_per_set);
+  ~Cache();
 };
 
 // check if an integer is a power of 2
@@ -52,8 +56,8 @@ bool isPowTwo(int n);
 
 int logTwo (int n);
 
-Cache load_create_set_block(Cache cache, Block new_block, int index);
-Cache load_add_block(Cache cache, Block new_block, int index);
+// Cache load_create_set_block(Cache cache, Block new_block, int index);
+// Cache load_add_block(Cache cache, Block new_block, int index);
 
 
 #endif
