@@ -22,3 +22,13 @@ int logTwo(int n){
     }
     return log;
 };
+
+Cache load_create_set_block(Cache cache, Block new_block, int index){
+    cache.insert(pair<int, Set> (index, Set() ));
+    new_block.access_ts = cache.cur_ts;
+    cache.cache.at(index).set.push_back(new_block);
+    cache.stats.load_miss++;
+
+    cache.stats.total_cycles += 1 + (100 * (bytes_per_block / 4));
+};
+
