@@ -123,10 +123,12 @@ int main (int argc, char* argv[]) {
           empty_block->load_ts = cache->cur_ts;
           empty_block->access_ts = cache->cur_ts;
           empty_block->valid = true;
+          empty_block->tag = tag;
         } else {
           if (cache->param->fifo) {
             min_load->access_ts = cache->cur_ts;
             min_load->load_ts = cache->cur_ts;
+            min_load->tag = tag;
             if (min_load->dirty){
               // dirty block eviction
               cache->stats->total_cycles += (100 * (bytes_per_block / 4));
@@ -136,6 +138,7 @@ int main (int argc, char* argv[]) {
           else if (cache->param->lru){
             min_access->access_ts = cache->cur_ts;
             min_access->load_ts = cache->cur_ts;
+            min_access->tag = tag;
             // dirty block eviction
             if (min_access->dirty){
               cache->stats->total_cycles += (100 * (bytes_per_block / 4));
@@ -191,6 +194,7 @@ int main (int argc, char* argv[]) {
           // write allocate: load block from memory into cache, update line in cache
           // if write through, write data to main memory
           cache->stats->total_cycles += 1 + (100 * (bytes_per_block / 4));
+          
           if (cache->param->write_through) {
             // write through fee
             cache->stats->total_cycles += 100;
