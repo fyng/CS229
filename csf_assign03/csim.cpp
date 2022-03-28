@@ -76,12 +76,18 @@ int main (int argc, char* argv[]) {
     ss >> action;
     ss >> addr;
     uint32_t address, index, tag;
-    address = stol(addr, 0 , 16);
+    address = stoul(addr, 0 , 16);
+
+    # FIXME: 
+    cout << "address: " << addr << endl;
     // uint32_t offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
-    index = (address << ((32 - logTwo(bytes_per_block) - logTwo(num_set))) >> (32 - logTwo(num_set)));
+    index = address << (32 - logTwo(bytes_per_block) - logTwo(num_set));
+    cout << "index: " << index << endl;
+    index >>= (32 - logTwo(num_set));
+    cout << "index: " << index << endl;
+
     tag = address >> (logTwo(bytes_per_block) + logTwo(num_set));
 
-    // Create the Block struct
 
     // If loading
     if (action.compare("l") == 0) {
