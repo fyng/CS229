@@ -84,18 +84,12 @@ int main (int argc, char* argv[]) {
     uint32_t address, index, tag;
     address = stoul(addr, 0 , 16);
 
-    //# FIXME: 
-    //cout << "address: " << addr << endl;
-    // uint32_t offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
     index = address << (32 - logTwo(bytes_per_block) - logTwo(num_set));
-    //cout << "index: " << index << endl;
     if (logTwo(num_set) == 0) {
       index = 0;
     } else {
       index >>= (32 - logTwo(num_set));
     }
-    //cout << "index: " << index << endl;
-
     tag = address >> (logTwo(bytes_per_block) + logTwo(num_set));
 
 
