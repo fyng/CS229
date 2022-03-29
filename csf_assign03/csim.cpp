@@ -66,6 +66,12 @@ int main (int argc, char* argv[]) {
     std::cerr << "Invalid eviction mode.\n";
     return 1;
   }
+
+  // Case for no-write-allocate and write-back
+  if (!cache->param->write_alloc && cache->param->write_back) {
+    std::cerr << "Can not have no-write-allocate and write-back.\n";
+    return 1;
+  }
   
   
   // read from input
