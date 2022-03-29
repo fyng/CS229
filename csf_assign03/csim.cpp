@@ -84,6 +84,7 @@ int main (int argc, char* argv[]) {
     uint32_t address, index, tag;
     address = stoul(addr, 0 , 16);
 
+<<<<<<< HEAD
     //# FIXME: 
     //cout << "address: " << addr << endl;
     // uint32_t offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
@@ -95,6 +96,19 @@ int main (int argc, char* argv[]) {
       index >>= (32 - logTwo(num_set));
     }
     //cout << "index: " << index << endl;
+=======
+    // FIXME: fail for ./csim 1 16 16 write-allocate write-through lru < gcc.trace
+    // cout << "address: " << addr << endl;
+    // uint32_t offset = (address << (32 - logTwo(bytes_per_block))) >> (32 - logTwo(bytes_per_block));
+    index = address << (32 - logTwo(bytes_per_block) - logTwo(num_set));
+    // cout << "index: " << index << endl;
+    index = index >> (32 - logTwo(num_set));
+    // cout << "index: " << index << endl;
+    // FIXME: replace after figuring out bit-shift mechanism
+    if (logTwo(num_set) == 0) {
+      index = 0;
+    }
+>>>>>>> 6e21f56 (update README, csim fixme comments)
 
     tag = address >> (logTwo(bytes_per_block) + logTwo(num_set));
 

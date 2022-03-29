@@ -10,3 +10,5 @@ Feiyang implemented input and string parsing
 Both debugged together
 
 AS3MS3:
+Feiyang redesigned the OO, implemented FIFO and corrected statistics for load/store hit/miss.
+Tae Wan debugged and did the majority of code refactoring.
