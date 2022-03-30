@@ -98,7 +98,7 @@ int cacheSetUp(char* argv[], Cache* cache) {
     return 1;
   }
 
-  // Case for no-write-allocare and write-back
+  // Case for no-write-allocate and write-back
   if (!cache->param->write_alloc && cache->param->write_back) {
     std::cerr << "Impossible write-miss mode and write-hit mode.\n";
     return 1;
@@ -166,6 +166,7 @@ void miss(Cache* cache, uint32_t tag, int bytes_per_block, Block* min_access, Bl
     min_access->access_ts = cache->cur_ts;
     min_access->load_ts = cache->cur_ts;
     min_access->tag = tag;
+    min_access->valid = true;
     // Dirty Block Eviction
     if (min_access->dirty) {
       cache->stats->total_cycles += (100 * (bytes_per_block / 4));
@@ -219,9 +220,9 @@ void store(Cache* cache, uint32_t index, uint32_t tag, int bytes_per_block) {
         // Write Through Fee
         cache->stats->total_cycles += 100; // Double Check Value
       }
-    } else {
-      // No Write Allocate
-      cache->stats->total_cycles += (100 * (bytes_per_block / 4));
+    } else if (cache->param->write_through){
+      // No Write Allocate 
+      cache->stats->total_cycles += 100;
     }
   }
 }
