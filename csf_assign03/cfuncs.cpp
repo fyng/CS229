@@ -121,14 +121,11 @@ void load(Cache* cache, uint32_t index, uint32_t tag, int bytes_per_block) {
   cache->cur_ts++;
 
   bool hit = false;
-  Block* empty_block = NULL;
-  Block* min_access = &cache->sets.at(index).front();
-  Block* min_load = &cache->sets.at(index).front();
+  vector<Block>* target_set = &cache->sets.at(index);
+  Block* min_access = &target_set->front();
+  Block* min_load = &target_set->front();
 
-  for(vector<Block>::iterator it = cache->sets.at(index).begin(); it != cache->sets.at(index).end(); ++it) {
-    if (empty_block == NULL && !it->valid) {
-      empty_block = &(*it);
-    }
+  for(vector<Block>::iterator it = target_set->begin(); it != target_set->end(); ++it) {
     if (it->load_ts < min_load->load_ts) {
       min_load = &(*it);
     }
@@ -147,39 +144,32 @@ void load(Cache* cache, uint32_t index, uint32_t tag, int bytes_per_block) {
   if (!hit) {
     cache->stats->load_miss++;
     cache->stats->total_cycles += 1 + (100 * (bytes_per_block / 4));
-    miss(cache, tag, bytes_per_block, empty_block, min_access, min_load);
+    miss(cache, tag, bytes_per_block, min_access, min_load);
   }
 }
 
-void miss(Cache* cache, uint32_t tag, int bytes_per_block, Block* empty_block, Block* min_access, Block* min_load) {
-  // Invalid Block
-  if (empty_block != NULL) {
-    empty_block->load_ts = cache->cur_ts;
-    empty_block->access_ts = cache->cur_ts;
-    empty_block->valid = true;
-    empty_block->tag = tag;
-  } else {
-    // FIFO Eviction
-    if (cache->param->fifo) {
-      min_load->access_ts = cache->cur_ts;
-      min_load->load_ts = cache->cur_ts;
-      min_load->tag = tag;
-      if (min_load->dirty) {
-	// Dirty Block Eviction
-	cache->stats->total_cycles += (100 * (bytes_per_block / 4));
-	min_load->dirty = false;
-      }
-    }
-    // LRU Eviction
-    else if (cache->param->lru) {
-      min_access->access_ts = cache->cur_ts;
-      min_access->load_ts = cache->cur_ts;
-      min_access->tag = tag;
+void miss(Cache* cache, uint32_t tag, int bytes_per_block, Block* min_access, Block* min_load) {
+  // FIFO Eviction
+  if (cache->param->fifo) {
+    min_load->access_ts = cache->cur_ts;
+    min_load->load_ts = cache->cur_ts;
+    min_load->valid = true;
+    min_load->tag = tag;
+    if (min_load->dirty) {
       // Dirty Block Eviction
-      if (min_access->dirty) {
-	cache->stats->total_cycles += (100 * (bytes_per_block / 4));
-	min_access->dirty = false;
-      }
+      cache->stats->total_cycles += (100 * (bytes_per_block / 4));
+      min_load->dirty = false;
+    }
+  }
+  // LRU Eviction
+  else if (cache->param->lru) {
+    min_access->access_ts = cache->cur_ts;
+    min_access->load_ts = cache->cur_ts;
+    min_access->tag = tag;
+    // Dirty Block Eviction
+    if (min_access->dirty) {
+      cache->stats->total_cycles += (100 * (bytes_per_block / 4));
+      min_access->dirty = false;
     }
   }
 }
@@ -189,14 +179,11 @@ void store(Cache* cache, uint32_t index, uint32_t tag, int bytes_per_block) {
   cache->cur_ts++;
 
   bool hit = false;
-  Block* empty_block = NULL;
-  Block* min_access = &cache->sets.at(index).front();
-  Block* min_load = &cache->sets.at(index).front();
+  vector<Block>* target_set = &cache->sets.at(index);
+  Block* min_access = &target_set->front();
+  Block* min_load = &target_set->front();
 
-  for(vector<Block>::iterator it = cache->sets.at(index).begin(); it != cache->sets.at(index).end(); ++it) {
-    if (empty_block == NULL && !it->valid) {
-      empty_block = &(*it);
-    }
+  for(vector<Block>::iterator it = target_set->begin(); it != target_set->end(); ++it) {
     if (it->load_ts < min_load->load_ts) {
       min_load = &(*it);
     }
@@ -208,13 +195,15 @@ void store(Cache* cache, uint32_t index, uint32_t tag, int bytes_per_block) {
       hit = true;
       cache->stats->store_hits++;
       it->access_ts = cache->cur_ts;
+      it->valid = true;
       if (cache->param->write_through) {
-	// Write Through
-	cache->stats->total_cycles += 100; // Double Check this value
+        // Write Through
+        cache->stats->total_cycles += 100; // Double Check this value
       } else if (cache->param->write_back) {
-	// Write Back
-	it->dirty = true;
-	cache->stats->total_cycles++;
+        // Write Back
+        it->valid = true;
+        it->dirty = true;
+        cache->stats->total_cycles++;
       }
       break;
     }
@@ -225,10 +214,10 @@ void store(Cache* cache, uint32_t index, uint32_t tag, int bytes_per_block) {
       // Write Allocate: Load block from memory into cache, update line cache
       // If Write Through, write data to main memory
       cache->stats->total_cycles += 1 + (100 * (bytes_per_block / 4));
-      miss(cache, tag, bytes_per_block, empty_block, min_access, min_load);
+      miss(cache, tag, bytes_per_block, min_access, min_load);
       if (cache->param->write_through) {
-	// Write Through Fee
-	cache->stats->total_cycles += 100; // Double Check Value
+        // Write Through Fee
+        cache->stats->total_cycles += 100; // Double Check Value
       }
     } else {
       // No Write Allocate

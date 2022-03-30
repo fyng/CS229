@@ -4,6 +4,7 @@
 #define CFUNCS_H
 #include <cstdint>
 #include <vector>
+#include <map>
 
 struct CacheParam {
   unsigned num_set = 0;
@@ -44,6 +45,8 @@ struct Block {
 
 struct Cache {
   std::vector<std::vector<Block>> sets;
+  // TODO: implement table of hits
+  std::map<unsigned, Block*> table;
   CacheParam* param;
   unsigned cur_ts = 0;
   Stats* stats;
@@ -67,7 +70,7 @@ uint32_t getIndex(uint32_t address, int bytes_per_block, int num_set);
 
 void load(Cache* cache, uint32_t index, uint32_t tag, int bytes_per_block);
 
-void miss(Cache* cache, uint32_t tag, int bytes_per_block, Block* empty_block, Block* min_access, Block* min_load);
+void miss(Cache* cache, uint32_t tag, int bytes_per_block, Block* min_access, Block* min_load);
 
 void store(Cache* cache, uint32_t index, uint32_t tag, int bytes_per_block);
 
