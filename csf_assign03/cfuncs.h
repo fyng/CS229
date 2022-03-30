@@ -59,5 +59,18 @@ int logTwo (int n);
 // Cache load_create_set_block(Cache cache, Block new_block, int index);
 // Cache load_add_block(Cache cache, Block new_block, int index);
 
+int parameterCheck(int argc, char* argv[]);
+
+int cacheSetUp(char* argv[], Cache* cache);
+
+uint32_t getIndex(uint32_t address, int bytes_per_block, int num_set);
+
+void load(Cache* cache, uint32_t index, uint32_t tag, int bytes_per_block);
+
+void miss(Cache* cache, uint32_t tag, int bytes_per_block, Block* empty_block, Block* min_access, Block* min_load);
+
+void store(Cache* cache, uint32_t index, uint32_t tag, int bytes_per_block);
+
+void printParameters(Cache* cache);
 
 #endif
