@@ -104,3 +104,6 @@ swim.trace tests:
 | write-allocate    | write-back       | fifo            | 220668     | 82525       | 219148   | 1520      | 61677     | 20848      | 2539993      |
 | write-allocate    | write-through    | fifo            | 220668     | 82525       | 219148   | 1520      | 61677     | 20848      | 10730816     |
 | no-write-allocate | write-through    | fifo            | 220668     | 82525       | 217217   | 3451      | 55354     | 27171      | 8818268      |
+
+# Acknowledgement #
+We thank John Franey for the excel table to markdown convertion tool found on https://tabletomarkdown.com/convert-spreadsheet-to-markdown/
