@@ -49,6 +49,7 @@ int main (int argc, char* argv[]) {
   }
 
   printParameters(cache);
+  // printTestParameters(cache);
   
   delete cache;
   return 0;

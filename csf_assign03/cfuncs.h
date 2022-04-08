@@ -76,4 +76,7 @@ void store(Cache* cache, uint32_t index, uint32_t tag, int bytes_per_block);
 
 void printParameters(Cache* cache);
 
+void printTestParameters(Cache* cache);
+
+
 #endif

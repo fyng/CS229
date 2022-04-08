@@ -238,3 +238,13 @@ void printParameters(Cache* cache) {
   cout << "Total cycles: " << cache->stats->total_cycles << endl;
 }
 
+void printTestParameters(Cache* cache) {
+  // Print out the parameter values asked for
+  cout << cache->stats->total_loads << "\t";
+  cout << cache->stats->total_stores << "\t";
+  cout << cache->stats->load_hits << "\t";
+  cout << cache->stats->load_miss << "\t";
+  cout << cache->stats->store_hits << "\t";
+  cout << cache->stats->store_miss << "\t";
+  cout << cache->stats->total_cycles << endl;
+}
