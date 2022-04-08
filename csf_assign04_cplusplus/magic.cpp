@@ -14,5 +14,26 @@
 #include "elf_names.h"
 
 int main(int argc, char **argv) {
-  // TODO: implement
+  if (argc != 1) {
+    return 1;
+  }
+
+  char* filename = argv[0];
+  // open file
+  int fd = open(filename, O_RDONLY);
+  struct stat statbuf;
+  int rc = fstat(fd, &statbuf);
+  if (rc != 0) {
+    // std::cerr << "cannot open input file." << std::endl;
+    return 1;
+  } 
+  size_t file_size = statbuf.st_size;
+  void *data = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  if (data == ((void *) - 1)) {
+    // std::cerr << "Program cannot access memory region." << std::endl;
+    return 1;
+  }
+
+  
+  return 0;
 }
