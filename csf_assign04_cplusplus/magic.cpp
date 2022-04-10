@@ -5,6 +5,8 @@
 #include <cerrno>
 #include <cstdint>
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <elf.h>
 #include <sys/mman.h>
 #include <sys/types.h>
@@ -37,10 +39,17 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // TODO: check if valid ELF file
-
-
   Elf64_Ehdr *elf_header = (Elf64_Ehdr *) data;
+  
+  // TODO: check if valid ELF file
+  if (elf_header->e_ident[EI_MAG0] != 0x7F
+      && elf_header->e_ident[EI_MAG1] != 0x45
+      && elf_header->e_ident[EI_MAG2] != 0x4c
+      && elf_header->e_ident[EI_MAG3] != 0x46) {
+    cout << "Not an ELF file" << endl;
+    return 0;
+  }
+
   // printf(".shstrtab section index is %u\n", elf_header->e_shstrndx);
   string endian;
   if (elf_header->e_ident[EI_DATA] == 1) {
@@ -49,6 +58,7 @@ int main(int argc, char **argv) {
     endian = "Big ndian";
   }
 
+  // print the header information
   cout << "Object file type: " << get_type_name(elf_header->e_type) << endl;
   cout << "Instruction set: " << get_machine_name(elf_header->e_machine) << endl;
   cout << "Endianness: " << endian << endl;
