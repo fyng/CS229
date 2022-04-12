@@ -67,10 +67,6 @@ int main(int argc, char **argv) {
   Elf64_Shdr *section_header = (Elf64_Shdr *) ((uint8_t*)data + elf_header->e_shoff);
   unsigned int num_entries = elf_header->e_shnum;
 
-<<<<<<< HEAD
-  // section name
-=======
->>>>>>> b91306c (small adjustments)
   Elf64_Shdr *shstrtab = &section_header[elf_header->e_shstrndx];
   unsigned char* name = (uint8_t*)data + shstrtab->sh_offset;
   
@@ -95,7 +91,7 @@ int main(int argc, char **argv) {
     
     printf("Symbol %u: name=%s, ", j, sym_name + symObj[j].st_name);
     printf("size=%lx, ", (long unsigned) symObj[j].st_size);
-    printf("info=%lx, :, ", (long unsigned) symObj[j].st_info);
+    printf("info=%lx, ", (long unsigned) symObj[j].st_info);
     printf("other=%lx\n", (long unsigned) symObj[j].st_other);
   }
 
