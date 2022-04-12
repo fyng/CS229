@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 
   // section header summary
   Elf64_Shdr *section_header = (Elf64_Shdr *) ((uint8_t*)data + elf_header->e_shoff);
-  uint8_t num_entries = elf_header->e_shnum;
+  unsigned int num_entries = elf_header->e_shnum;
 
   // section name
   Elf64_Shdr *shstrtab = &section_header[elf_header->e_shstrndx];
@@ -79,16 +79,19 @@ int main(int argc, char **argv) {
   }
 
   // symbol summary
-  Elf64_Sym *symtab = $section_header[elf_header->e_shstrndx];
-  uint8_t num_symbols = symtab->sh_size / symtab->sh_entsize;
+  Elf64_Shdr *symtab = &section_header[num_entries - 3];
+  Elf64_Shdr *strtab = &section_header[num_entries - 2];
+  unsigned int num_symbols = symtab->sh_size / symtab->sh_entsize;
 
-  unsigned char* symbol_name = (uint8_t)data + symtab->st_name;
+  unsigned char* sym_name = (uint8_t *)data + strtab->sh_offset;
   
   for (unsigned j = 0; j < num_symbols; j++) {
-    printf("Symbol %u: name=%s, ", j, [insert name]);
-    printf("type=%lx, ", [insert type]);
-    printf("offset=%lx, :, ", [insert offset]);
-    printf("size=%lx\n", [insert size]);
+    Elf64_Sym *symObj = (Elf64_Sym *) ((uint8_t*)data + symtab->sh_offset);
+    
+    printf("Symbol %u: name=%s, ", j, sym_name + symObj[j].st_name);
+    printf("size=%lx, ", (long unsigned) symObj[j].st_size);
+    printf("info=%lx, :, ", (long unsigned) symObj[j].st_info);
+    printf("other=%lx\n", (long unsigned) symObj[j].st_other);
   }
 
   return 0;
