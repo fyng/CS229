@@ -67,16 +67,16 @@ int main(int argc, char **argv) {
   Elf64_Shdr *section_header = (Elf64_Shdr *) ((uint8_t*)data + elf_header->e_shoff);
   uint8_t num_entries = elf_header->e_shnum;
 
-  uint8_t stringTable_idx = elf_header->e_shstrndx;
+  // uint8_t stringTable_idx = elf_header->e_shstrndx;
   // char* stringTable = (char*) (section_header + stringTable_idx);
-  Elf64_Shdr *shstrtab = &section_header[stringTable_idx];
-  uint8_t data_offset = shstrtab->sh_offset;
-  char* name = (char *) (shstrtab + data_offset);
+  Elf64_Shdr *shstrtab = &section_header[elf_header->e_shstrndx];
+  // uint8_t data_offset = shstrtab->sh_offset;
+  unsigned char* name = (uint8_t*)data + shstrtab->sh_offset;
   
   for (unsigned i = 0; i < num_entries; i++){
-    uint8_t name_index = (uint8_t) section_header[i].sh_name;
+    // uint8_t name_index = (uint8_t) section_header[i].sh_name;
 
-    printf("Section header %u: name=%s, ", i, name + name_index);
+    printf("Section header %u: name=%s, ", i, name +section_header[i].sh_name);
     printf("type=%lx, ", (long unsigned) section_header[i].sh_type);
     printf("offset=%lx, ", section_header[i].sh_offset);
     printf("size=%lx\n", section_header[i].sh_size);
