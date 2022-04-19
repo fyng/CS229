@@ -36,14 +36,19 @@ void Connection::connect(const std::string &hostname, int port) {
 
 Connection::~Connection() {
   // TODO: close the socket if it is open
+  close();
 }
 
 bool Connection::is_open() const {
   // TODO: return true if the connection is open
+  return !(m_fd < 0);
 }
 
 void Connection::close() {
   // TODO: close the connection if it is open
+  if (is_open()){
+    Close(m_fd);
+  }
 }
 
 bool Connection::send(const Message &msg) {
