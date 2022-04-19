@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
   username = argv[3];
 
   // TODO: connect to server
+  Message login = Message(TAG_RLOGIN, username); 
 
   // TODO: send slogin message
 
