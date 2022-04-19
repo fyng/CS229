@@ -22,15 +22,29 @@ int main(int argc, char **argv) {
 
   // TODO: connect to server
   int receiver_fd = open_clientfd(server_hostname, server_port);
-
+  conn = Connection(receiver_fd); 
+  
   // TODO: send rlogin and join messages (expect a response from
   //       the server for each one)
- rlogin:username;
- join:room;
-
+  Message username_message = Message(TAG_RLOGIN, username);
+  rio_writen(receiver_fd, username_message, 255);
+  Message rec_user_mess = rio_readnb();
+  if (!conn.receive(rec_user_mess)) {
+    cout << "Error reason" << endl;
+    return 1;
+  }
+  Message room_message = Message(TAG_JOIN, room_name);
+  rio_writen(receiver_fd, room_message, 255);
+  Message rec_room_mess = rio_readnb();
+  if (!conn.receive(rec_room_mess)) {
+    cout << "Error reason" << endl;
+    return 1;
+  }
+  
   // TODO: loop waiting for messages from server
   //       (which should be tagged with TAG_DELIVERY)
-  while () {
+  while (1) {
+    
     cout << "[insert text]" << endl;
   }
 
