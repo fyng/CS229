@@ -57,16 +57,16 @@ bool Connection::send(const Message &msg) {
   // TODO: send a message
   // return true if successful, false if not
   // make sure that m_last_result is set appropriately
-  int msg_len = msg->tag.length() + msg->data.length() + 1;
-  std::string msg;
-  msg << msg->tag << ":" << msg->data;
-  ssize_t write_len = rio_writen(m_fd, &msg[0], msg_len);
+  int msg_len = msg.tag.length() + msg.data.length() + 1;
+  std::string send_msg;
+  send_msg << msg.tag << ":" << msg.data;
+  ssize_t write_len = rio_writen(m_fd, &send_msg[0], msg_len);
 
   if (write_len == -1){
-    m_last_result(EOF_OR_ERROR);
+    m_last_result = EOF_OR_ERROR;
     return false;
   }
-  m_last_result(SUCCESS);
+  m_last_result = SUCCESS;
   return true;
 }
 
@@ -74,26 +74,25 @@ bool Connection::receive(Message &msg) {
   // TODO: receive a message, storing its tag and data in msg
   // return true if successful, false if not
   // make sure that m_last_result is set appropriately
-  int len = msg->MAX_LEN;
   std::string read_buf; 
-  ssize_t read_len = Rio_readlineb(m_fdbuf, read_buf, msg->MAX_LEN);
+  ssize_t read_len = Rio_readlineb(&m_fdbuf, read_buf, msg.MAX_LEN);
   if (read_len == 0){
-     m_last_result(EOF_OR_ERROR);
+     m_last_result = EOF_OR_ERROR;
     return false;   
   }
 
-  read_buf = trim(read_buf);
+  // read_buf = trim(read_buf);
   std::string delim = ":";
   size_t found = read_buf.find(delim);
   if (found == std::string::npos){
     // invalid message: no ":"
-    m_last_result(INVALID_MSG);
+    m_last_result = INVALID_MSG;
     return false;
   }
-  msg->tax = read_buf.substr(0, found);
+  msg.tag = read_buf.substr(0, found);
   read_buf.erase(0, found + delim.length());
-  msg->data = read_buf;
+  msg.data = read_buf;
 
-  m_last_result(SUCCESS);
+  m_last_result = SUCCESS;
   return true;
 }
