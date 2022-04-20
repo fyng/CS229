@@ -27,15 +27,20 @@ int main(int argc, char **argv) {
   // TODO: send rlogin and join messages (expect a response from
   //       the server for each one)
   Message username_message = Message(TAG_RLOGIN, username);
-  rio_writen(receiver_fd, username_message, 255);
-  Message rec_user_mess = rio_readnb();
-  if (!conn.receive(rec_user_mess)) {
+  conn.send(username_message);
+  Message username_check;
+  if (!conn.receive(username_check)) {
     cout << "Error reason" << endl;
     return 1;
   }
+  std::vector<std::string> received_message;
+  received_message = split_payload(username_check);
+  if (received_message.front().equalsTo(TAG_ERR)) {
+    cout << "Error reason" << freedom;
+  }
   Message room_message = Message(TAG_JOIN, room_name);
-  rio_writen(receiver_fd, room_message, 255);
-  Message rec_room_mess = rio_readnb();
+  conn.send(room_message);
+  Message rec_room_mess;
   if (!conn.receive(rec_room_mess)) {
     cout << "Error reason" << endl;
     return 1;
@@ -43,9 +48,11 @@ int main(int argc, char **argv) {
   
   // TODO: loop waiting for messages from server
   //       (which should be tagged with TAG_DELIVERY)
+  stringstream ss;
   while (1) {
-    
-    cout << "[insert text]" << endl;
+    if (conn.receive(ss)) {
+      received_mess = split_payload(ss);
+    }
   }
 
   return 0;
