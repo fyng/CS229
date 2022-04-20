@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
   }
 
   std::string server_hostname = argv[1];
-  std::string server_port = argv[2];
+  int server_port = std::stoi(argv[2]);
   std::string username = argv[3];
   std::string room_name = argv[4];
 
@@ -22,9 +22,8 @@ int main(int argc, char **argv) {
 
   // TODO: connect to server
 
-  // Set up receiver file descriptor and use Connection constructor
-  int receiver_fd = open_clientfd(server_hostname, server_port);
-  conn = Connection(receiver_fd); 
+  // Set up connection to server using connect function
+  conn.connect(server_hostname, server_port); 
   
   // TODO: send rlogin and join messages (expect a response from
   //       the server for each one)
@@ -36,18 +35,18 @@ int main(int argc, char **argv) {
   // See if rlogin was successful
   Message username_check;
   if (!conn.receive(username_check)) {
-    cout << "Failed Receiver Login" << endl;
+    std::cout << "Failed Receiver Login" << std::endl;
     return 1;
   }
   // Receive returned properly, check answer
   std::vector<std::string> received_message;
-  received_message = split_payload(username_check);
+  received_message = username_check.split_payload();
   // Error, something went wrong server side or OK, else unknown behavior
-  if (strcmp(received_message[0], TAG_ERR) == 0) {
+  if (received_message[0].compare(TAG_ERR) == 0) {
     std::cerr << received_message[1] << std::endl;
     std::cout << received_message[1] << std::endl;
     return 1;
-  } else if (strcmp(received_message[0], TAG_OK) == 0) {
+  } else if (received_message[0].compare(TAG_OK) == 0) {
     std::cout << received_message[1] << std::endl;
   } else {
     // Should have received OK, if not, unknown behavior
@@ -66,13 +65,13 @@ int main(int argc, char **argv) {
     return 1;
   }
   // Receive returned properly, received reply message
-  received_message = split_payload(rec_room_mess);
+  received_message = rec_room_mess.split_payload();
   // Error, something went wrong server side or OK, else unknown behavior
-  if (strcmp(received_message[0], TAG_ERR) == 0) {
+  if (received_message[0].compare(TAG_ERR) == 0) {
     std::cerr << received_message[1] << std::endl;
     std::cout << received_message[1] << std::endl;
     return 1;
-  } else if (strcmp(received_message[0], TAG_OK) == 0) {
+  } else if (received_message[0].compare(TAG_OK) == 0) {
     std::cout << received_message[1] << std::endl;
   } else {
     // Should have received OK, if not, unknown behavior
@@ -91,13 +90,13 @@ int main(int argc, char **argv) {
       return 1;
     }
     // If receive did not fail, then print sent message
-    received_message = split_payload(server_message);
-    if (strcmp(received_message[0], TAG_DELIVERY) == 0) {
+    received_message = server_message.split_payload();
+    if (received_message[0].compare(TAG_DELIVERY) == 0) {
       std::cout << received_message[2]
 		<< ":"
 		<< received_message[3]
 		<< std::endl;
-    } else if (strcmp(received_message[0], TAG_ERR) == 0) {
+    } else if (received_message[0].compare(TAG_ERR) == 0) {
       std::cout << received_message[1] << std::endl;
     }
   }
