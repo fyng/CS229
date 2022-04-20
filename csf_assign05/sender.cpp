@@ -10,8 +10,8 @@
 int Receive(Connection * link){
   Message incoming_msg;
   link->receive(incoming_msg);
-  if (incoming_msg->tag == TAG_ERR){
-    std::cerr << incoming_msg->data << std::endl;
+  if (incoming_msg.tag == TAG_ERR){
+    std::cerr << incoming_msg.data << std::endl;
     return 1;
   }
   // if (incoming_msg->tag == TAG_OK){
@@ -35,38 +35,39 @@ int main(int argc, char **argv) {
   username = argv[3];
 
   // TODO: connect to server
-  Connection link = connect(server_hostname, server_port);
+  Connection link;
+  link.connect(server_hostname, server_port);
 
   // TODO: send slogin message
   Message outgoing_msg = Message(TAG_SLOGIN, username);
   link.send(outgoing_msg);
-  return Receive(&link);
+  if (Receive(&link)){
+    return 1;
   }
-
   // TODO: loop reading commands from user, sending messages to
   //       server as appropriate
   std::string input;
   while (std::getline(std::cin, input)){
-    stringstream ss(input);
-    stringstream cmd;
+    std::stringstream ss(input);
+    std::string cmd;
     ss >> cmd;
     if (!(cmd.compare("/quit"))){
-      outgoing_msg = (TAG_QUIT, "");
+      outgoing_msg = Message(TAG_QUIT, "");
       link.send(outgoing_msg);
       if (!Receive(&link)){
         return 1;
       }
     } else if (!(cmd.compare("/join"))) {
-      outgoing_msg = (TAG_JOIN, ss);
+      outgoing_msg = Message(TAG_JOIN, ss.str());
       Receive(&link);
-    } else if (!(cmd.compare("/leave")){
-      outgoing_msg = (TAG_LEAVE, "");
+    } else if (!(cmd.compare("/leave"))){
+      outgoing_msg = Message(TAG_LEAVE, "");
       link.send(outgoing_msg);
       Receive(&link);
-    } else if (strtok(cmd, "/") != NULL){
-      std::cerr << "Invalid command" << endl;
+    } else if (strtok(&*cmd.begin(), "/") != NULL){
+      std::cerr << "Invalid command" << std::endl;
     } else {
-      outgoing_msg = (TAG_SENDALL, ss);
+      outgoing_msg = Message(TAG_SENDALL, ss.str());
       link.send(outgoing_msg);
       Receive(&link);
     }
