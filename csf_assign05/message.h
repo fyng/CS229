@@ -30,17 +30,20 @@ struct Message {
 
     // Set read the data messages in between
     std::size_t data_segment_start = 0;
-    std::size_t old_found = 0;
     std::size_t found = data.find(":");
     while (found!=std::string::npos) {
-      result.push_back(data.substr(data_segment_start, found - old_found));
-      old_found = found;
-      found = data.find(":", found + 1);
-      data_segment_start += found;
+      result.push_back(data.substr(data_segment_start, found - data_segment_start));
+      data_segment_start = found + 1;
+      found = data.find(":", data_segment_start);
     }
     
     // Read last data message that does not end with :
-    result.push_back(data.substr(old_found, std::string::npos));
+    result.push_back(data.substr(data_segment_start, found - data_segment_start));
+
+    // for(int i = 0; i < result.size(); i++) {
+    //   std::cout << result[i] << std::endl;
+    // }
+
     return result;
   }
 };

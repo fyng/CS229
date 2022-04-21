@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
       std::cerr << "Failed to receive any message" << std::endl;
       return 1;
     }
+    
     // If receive did not fail, then print sent message
     received_message = server_message.split_payload();
     if (received_message[0].compare(TAG_DELIVERY) == 0) {
