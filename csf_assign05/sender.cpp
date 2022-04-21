@@ -11,11 +11,22 @@ int Receive(Connection * link){
   Message incoming_msg;
   link->receive(incoming_msg);
   if (incoming_msg.tag == TAG_ERR){
-    std::cerr << incoming_msg.data << std::endl;
+    std::cerr << incoming_msg.data;
     return 1;
   }
   return 0;
 }
+
+int Send(Connection * link, std::string tag, std::string data){
+  data += "\n";
+  Message msg = Message(tag, data);
+  if ((msg.tag.length() + msg.data.length() + 1) > msg.MAX_LEN){
+    std::cerr << "Message exceeds max length" << std::endl;
+    return 1;
+  }
+  link->send(msg);
+  return 0;
+} 
 
 int main(int argc, char **argv) {
   if (argc != 4) {
@@ -35,10 +46,11 @@ int main(int argc, char **argv) {
   link.connect(server_hostname, server_port);
 
   // TODO: send slogin message
-  username += "\n";
-  Message outgoing_msg = Message(TAG_SLOGIN, username);
-  link.send(outgoing_msg);
+  if (Send(&link, TAG_SLOGIN, username)){
+    return 1;
+  }
   if (Receive(&link)){
+    // std::cerr << "Sender failed to login to server" << std::endl;
     return 1;
   }
 
@@ -50,25 +62,19 @@ int main(int argc, char **argv) {
     std::string cmd, payload;
     ss >> cmd;
     if (input.find("/") == std::string::npos){
-      input += "\n";
-      outgoing_msg = Message(TAG_SENDALL, input);
-      link.send(outgoing_msg);
+      Send(&link, TAG_SENDALL, input);
       Receive(&link);
     } else if (!(cmd.compare("/quit"))){
-      outgoing_msg = Message(TAG_QUIT, "bye\n");
-      link.send(outgoing_msg);
+      Send(&link, TAG_QUIT, "bye");
       if (!Receive(&link)){
         return 0;
       }
     } else if (!(cmd.compare("/join"))) {
       ss >> payload;
-      payload += "\n";
-      outgoing_msg = Message(TAG_JOIN, payload);
-      link.send(outgoing_msg);
-      Receive(&link);
+      Send(&link, TAG_JOIN, payload);
+      // if (Receive(&link)) return 1;
     } else if (!(cmd.compare("/leave"))){
-      outgoing_msg = Message(TAG_LEAVE, "yeet\n");
-      link.send(outgoing_msg);
+      Send(&link, TAG_LEAVE, "yeet");
       Receive(&link);
     } else {
       std::cerr << "Invalid command" << std::endl;
