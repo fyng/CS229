@@ -7,27 +7,6 @@
 #include "connection.h"
 #include "client_util.h"
 
-int Receive(Connection * link){
-  Message incoming_msg;
-  link->receive(incoming_msg);
-  if (incoming_msg.tag == TAG_ERR){
-    std::cerr << incoming_msg.data;
-    return 1;
-  }
-  return 0;
-}
-
-int Send(Connection * link, std::string tag, std::string data){
-  data += "\n";
-  Message msg = Message(tag, data);
-  if ((msg.tag.length() + msg.data.length() + 1) > msg.MAX_LEN){
-    std::cerr << "Message exceeds max length" << std::endl;
-    return 1;
-  }
-  link->send(msg);
-  return 0;
-} 
-
 int main(int argc, char **argv) {
   if (argc != 4) {
     std::cerr << "Usage: ./sender [server_address] [port] [username]\n";
