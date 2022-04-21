@@ -26,7 +26,6 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  
   // TODO: send rlogin and join messages (expect a response from
   //       the server for each one)
   Send(&conn, TAG_RLOGIN, username);
@@ -37,37 +36,6 @@ int main(int argc, char **argv) {
   if (Receive(&conn)){
     return 1;
   }
-
-  // // Receive returned properly, check answer
-  // std::vector<std::string> received_message;
-  // received_message = username_check.split_payload();
-  // // Error, something went wrong server side or OK, else unknown behavior
-  // if (received_message[0].compare(TAG_ERR) == 0) {
-  //   std::cerr << received_message[1] << std::endl;
-  //   std::cout << received_message[1] << std::endl;
-  //   return 1;
-  // } else if (received_message[0].compare(TAG_OK) == 0) {
-  //   std::cout << received_message[1] << std::endl;
-  // } else {
-  //   // Should have received OK, if not, unknown behavior
-  //   std::cerr << "Unknown/Invalid Tag received" << std::endl;
-  //   return 2;
-  // }
-
-  // // Receive returned properly, received reply message
-  // received_message = rec_room_mess.split_payload();
-  // // Error, something went wrong server side or OK, else unknown behavior
-  // if (received_message[0].compare(TAG_ERR) == 0) {
-  //   std::cerr << received_message[1] << std::endl;
-  //   std::cout << received_message[1] << std::endl;
-  //   return 1;
-  // } else if (received_message[0].compare(TAG_OK) == 0) {
-  //   std::cout << received_message[1] << std::endl;
-  // } else {
-  //   // Should have received OK, if not, unknown behavior
-  //   std::cerr << "Uknown/Invalid Tag received" << std::endl;
-  //   return 2;
-  // }
   
   // TODO: loop waiting for messages from server
   //       (which should be tagged with TAG_DELIVERY)

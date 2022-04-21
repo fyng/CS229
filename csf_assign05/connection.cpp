@@ -80,15 +80,15 @@ bool Connection::receive(Message &msg) {
   // First set read_buf as void* to receive message
   char read_buf[msg.MAX_LEN];
   ssize_t read_len = rio_readlineb(&m_fdbuf, read_buf, msg.MAX_LEN);
-  if (read_len == 0){
-     m_last_result = EOF_OR_ERROR;
-    return false;   
-  }
-  std::string buf = std::string(read_buf);
-  size_t delim = buf.find(":");
-  msg.tag = buf.substr(0, delim);
-  msg.data = buf.substr(delim+1, std::string::npos);
+  if (read_len > 0){
+    std::string buf = std::string(read_buf);
+    size_t delim = buf.find(":");
+    msg.tag = buf.substr(0, delim);
+    msg.data = buf.substr(delim+1, std::string::npos);
 
-  m_last_result = SUCCESS;
-  return true;
+    m_last_result = SUCCESS;
+    return true;     
+  }
+  m_last_result = EOF_OR_ERROR;
+  return false;   
 }
