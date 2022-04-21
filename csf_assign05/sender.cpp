@@ -41,10 +41,12 @@ int main(int argc, char **argv) {
 
   // TODO: send slogin message
   Message outgoing_msg = Message(TAG_SLOGIN, username);
-  bool sent = false;
-  while (!sent) {
-    sent = link.send(outgoing_msg);
-  }
+  // bool sent = false;
+  // while (!sent) {
+  //   sent = link.send(outgoing_msg);
+  // }
+
+  link.send(outgoing_msg);
   if (Receive(&link)){
     return 1;
   }
