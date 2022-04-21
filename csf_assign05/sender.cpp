@@ -58,27 +58,29 @@ int main(int argc, char **argv) {
     std::stringstream ss(input);
     std::string cmd;
     ss >> cmd;
-    if (!(cmd.compare("/quit"))){
+    if (input.find("/") == std::string::npos){
+      outgoing_msg = Message(TAG_SENDALL, input);
+      link.send(outgoing_msg);
+      Receive(&link);
+    } else if (!(cmd.compare("/quit"))){
       outgoing_msg = Message(TAG_QUIT, "");
       link.send(outgoing_msg);
       if (!Receive(&link)){
         return 0;
       }
     } else if (!(cmd.compare("/join"))) {
-      outgoing_msg = Message(TAG_JOIN, ss.str());
+      std::string room;
+      ss >> room;
+      outgoing_msg = Message(TAG_JOIN, room);
+      link.send(outgoing_msg);
       Receive(&link);
     } else if (!(cmd.compare("/leave"))){
       outgoing_msg = Message(TAG_LEAVE, "");
       link.send(outgoing_msg);
       Receive(&link);
-    } else if (strtok(&*cmd.begin(), "/") != NULL){
-      std::cerr << "Invalid command" << std::endl;
     } else {
-      outgoing_msg = Message(TAG_SENDALL, ss.str());
-      link.send(outgoing_msg);
-      Receive(&link);
-    }
-
+      std::cerr << "Invalid command" << std::endl;
+    } 
   }
 
   return 0;
