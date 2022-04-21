@@ -40,7 +40,7 @@ struct Message {
     }
     
     // Read last data message that does not end with :
-    result.push_back(data.substr(old_found, string::npos));
+    result.push_back(data.substr(old_found, std::string::npos));
     return result;
   }
 };

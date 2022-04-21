@@ -59,7 +59,10 @@ bool Connection::send(const Message &msg) {
   // make sure that m_last_result is set appropriately
   int msg_len = msg.tag.length() + msg.data.length() + 1;
   std::string send_msg;
-  send_msg << msg.tag << ":" << msg.data;
+  send_msg += msg.tag;
+  send_msg += ":";
+  send_msg += msg.data;
+  //send_msg << msg.tag << ":" << msg.data;
   ssize_t write_len = rio_writen(m_fd, &send_msg[0], msg_len);
 
   if (write_len == -1){
@@ -74,24 +77,30 @@ bool Connection::receive(Message &msg) {
   // TODO: receive a message, storing its tag and data in msg
   // return true if successful, false if not
   // make sure that m_last_result is set appropriately
-  std::string read_buf; 
+
+  // First set read_buf as void* to receive message
+  void* read_buf = static_cast<void*>(new std::string); 
   ssize_t read_len = Rio_readlineb(&m_fdbuf, read_buf, msg.MAX_LEN);
   if (read_len == 0){
      m_last_result = EOF_OR_ERROR;
     return false;   
   }
+  // Convert the void* into a string object
+  std::string *read_buf_pt = static_cast<std::string*>(read_buf);
+  std::string read_buf_string = *read_buf_pt;
+  delete read_buf_pt;
 
   // read_buf = trim(read_buf);
   std::string delim = ":";
-  size_t found = read_buf.find(delim);
+  size_t found = read_buf_string.find(delim);
   if (found == std::string::npos){
     // invalid message: no ":"
     m_last_result = INVALID_MSG;
     return false;
   }
-  msg.tag = read_buf.substr(0, found);
-  read_buf.erase(0, found + delim.length());
-  msg.data = read_buf;
+  msg.tag = read_buf_string.substr(0, found);
+  read_buf_string.erase(0, found + delim.length());
+  msg.data = read_buf_string;
 
   m_last_result = SUCCESS;
   return true;
