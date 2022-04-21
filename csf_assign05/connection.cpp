@@ -86,15 +86,10 @@ bool Connection::receive(Message &msg) {
      m_last_result = EOF_OR_ERROR;
     return false;   
   }
-  char * token = strtok(read_buf, ":");
-  if (token == NULL){
-    // invalid message: no ":"
-    m_last_result = INVALID_MSG;
-    return false;
-  }
-  msg.tag = std::string(token);
-  token = strtok(NULL, ":");
-  msg.data = std::string(token);
+  std::string buf = std::string(read_buf);
+  size_t delim = buf.find(":");
+  msg.tag = buf.substr(0, delim);
+  msg.data = buf.substr(delim+1, std::string::npos);
 
   m_last_result = SUCCESS;
   return true;
