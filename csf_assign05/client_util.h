@@ -13,5 +13,7 @@ std::string rtrim(const std::string &s);
 std::string trim(const std::string &s);
 
 // you can add additional declarations here...
+int Receive(Connection * link);
+int Send(Connection * link, std::string tag, std::string data);
 
 #endif // CLIENT_UTIL_H

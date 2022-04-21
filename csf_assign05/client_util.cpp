@@ -22,3 +22,24 @@ std::string rtrim(const std::string &s) {
 std::string trim(const std::string &s) {
   return rtrim(ltrim(s));
 }
+
+int Receive(Connection * link){
+  Message incoming_msg;
+  link->receive(incoming_msg);
+  if (incoming_msg.tag == TAG_ERR){
+    std::cerr << incoming_msg.data;
+    return 1;
+  }
+  return 0;
+}
+
+int Send(Connection * link, std::string tag, std::string data){
+  data += "\n";
+  Message msg = Message(tag, data);
+  if ((msg.tag.length() + msg.data.length() + 1) > msg.MAX_LEN){
+    std::cerr << "Message exceeds max length" << std::endl;
+    return 1;
+  }
+  link->send(msg);
+  return 0;
+} 
