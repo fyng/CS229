@@ -60,9 +60,10 @@ bool Connection::send(const Message &msg) {
   // make sure that m_last_result is set appropriately
   size_t msg_len = msg.tag.length() + msg.data.length() + 1;
   std::string send_msg;
-  send_msg += msg.tag;
-  send_msg += ":";
-  send_msg += msg.data;
+  send_msg = msg.tag + ":" + msg.data;
+  // send_msg += ":";
+  // send_msg += msg.data;
+  
   ssize_t write_len = rio_writen(m_fd, &send_msg[0], msg_len);
 
   if (write_len == -1){
@@ -85,7 +86,6 @@ bool Connection::receive(Message &msg) {
      m_last_result = EOF_OR_ERROR;
     return false;   
   }
-
   char * token = strtok(read_buf, ":");
   if (token == NULL){
     // invalid message: no ":"

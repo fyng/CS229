@@ -10,14 +10,10 @@
 int Receive(Connection * link){
   Message incoming_msg;
   link->receive(incoming_msg);
-
   if (incoming_msg.tag == TAG_ERR){
     std::cerr << incoming_msg.data << std::endl;
     return 1;
   }
-  // if (incoming_msg->tag == TAG_OK){
-  //   return 0;
-  // }
   return 0;
 }
 
@@ -30,7 +26,6 @@ int main(int argc, char **argv) {
   std::string server_hostname;
   int server_port;
   std::string username;
-
   server_hostname = argv[1];
   server_port = std::stoi(argv[2]);
   username = argv[3];
@@ -40,12 +35,8 @@ int main(int argc, char **argv) {
   link.connect(server_hostname, server_port);
 
   // TODO: send slogin message
+  username += "\n";
   Message outgoing_msg = Message(TAG_SLOGIN, username);
-  // bool sent = false;
-  // while (!sent) {
-  //   sent = link.send(outgoing_msg);
-  // }
-
   link.send(outgoing_msg);
   if (Receive(&link)){
     return 1;
@@ -56,26 +47,27 @@ int main(int argc, char **argv) {
   std::string input;
   while (std::getline(std::cin, input)){
     std::stringstream ss(input);
-    std::string cmd;
+    std::string cmd, payload;
     ss >> cmd;
     if (input.find("/") == std::string::npos){
+      input += "\n";
       outgoing_msg = Message(TAG_SENDALL, input);
       link.send(outgoing_msg);
       Receive(&link);
     } else if (!(cmd.compare("/quit"))){
-      outgoing_msg = Message(TAG_QUIT, "");
+      outgoing_msg = Message(TAG_QUIT, "bye\n");
       link.send(outgoing_msg);
       if (!Receive(&link)){
         return 0;
       }
     } else if (!(cmd.compare("/join"))) {
-      std::string room;
-      ss >> room;
-      outgoing_msg = Message(TAG_JOIN, room);
+      ss >> payload;
+      payload += "\n";
+      outgoing_msg = Message(TAG_JOIN, payload);
       link.send(outgoing_msg);
       Receive(&link);
     } else if (!(cmd.compare("/leave"))){
-      outgoing_msg = Message(TAG_LEAVE, "");
+      outgoing_msg = Message(TAG_LEAVE, "yeet\n");
       link.send(outgoing_msg);
       Receive(&link);
     } else {
