@@ -27,12 +27,10 @@ void Connection::connect(const std::string &hostname, int port) {
   p << port;
 
   m_fd = open_clientfd(hostnm, p.str().c_str());
-  if (m_fd == -2){
-    // handle error
-  } else if (m_fd == -1){
-    // handle error
+  if (m_fd < 0){
+    return;
   } 
-
+  
   // assume successful open
   Rio_readinitb(&m_fdbuf, m_fd);
 }

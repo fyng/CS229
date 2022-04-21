@@ -39,11 +39,6 @@ struct Message {
     
     // Read last data message that does not end with :
     result.push_back(data.substr(data_segment_start, found - data_segment_start));
-
-    // for(int i = 0; i < result.size(); i++) {
-    //   std::cout << result[i] << std::endl;
-    // }
-
     return result;
   }
 };

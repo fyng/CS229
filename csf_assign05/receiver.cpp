@@ -21,6 +21,11 @@ int main(int argc, char **argv) {
   // TODO: connect to server
   Connection conn;
   conn.connect(server_hostname, server_port); 
+  if (!conn.is_open()) {
+    std::cerr << "Failed to connect to server" << std::endl;
+    return 1;
+  }
+
   
   // TODO: send rlogin and join messages (expect a response from
   //       the server for each one)
@@ -79,7 +84,7 @@ int main(int argc, char **argv) {
     // If receive did not fail, then print sent message
     received_message = server_message.split_payload();
     if (received_message[0].compare(TAG_DELIVERY) == 0) {
-      std::cout << received_message[2]	<< ":"	<< received_message[3];
+      std::cout << received_message[2]	<< ": "	<< received_message[3];
     } else if (received_message[0].compare(TAG_ERR) == 0) {
       std::cout << received_message[1];
     }

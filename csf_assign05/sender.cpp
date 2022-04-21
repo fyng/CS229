@@ -23,13 +23,16 @@ int main(int argc, char **argv) {
   // TODO: connect to server
   Connection link;
   link.connect(server_hostname, server_port);
+  if (!link.is_open()) {
+    std::cerr << "Failed to connect to server" << std::endl;
+    return 1;
+  }
 
   // TODO: send slogin message
   if (Send(&link, TAG_SLOGIN, username)){
     return 1;
   }
   if (Receive(&link)){
-    // std::cerr << "Sender failed to login to server" << std::endl;
     return 1;
   }
 
