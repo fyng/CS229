@@ -1,4 +1,6 @@
-Sample README.txt
+// Feiyang Huang; fhuang15
+// Tae Wan Kim; tkim104
 
-Eventually your report about how you implemented thread synchronization
-in the server should go here
+# Contributions #
+*AS5MS1:*
+We split the work between sender.cpp and receiver.cpp. Feiyang worked on sender.cpp while Tae Wan worked on receiver.cpp and the split_payload(). Both edited connection.cpp together.
