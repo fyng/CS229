@@ -10,6 +10,7 @@
 int Receive(Connection * link){
   Message incoming_msg;
   link->receive(incoming_msg);
+
   if (incoming_msg.tag == TAG_ERR){
     std::cerr << incoming_msg.data << std::endl;
     return 1;
@@ -40,10 +41,14 @@ int main(int argc, char **argv) {
 
   // TODO: send slogin message
   Message outgoing_msg = Message(TAG_SLOGIN, username);
-  link.send(outgoing_msg);
+  bool sent = false;
+  while (!sent) {
+    sent = link.send(outgoing_msg);
+  }
   if (Receive(&link)){
     return 1;
   }
+
   // TODO: loop reading commands from user, sending messages to
   //       server as appropriate
   std::string input;
@@ -55,7 +60,7 @@ int main(int argc, char **argv) {
       outgoing_msg = Message(TAG_QUIT, "");
       link.send(outgoing_msg);
       if (!Receive(&link)){
-        return 1;
+        return 0;
       }
     } else if (!(cmd.compare("/join"))) {
       outgoing_msg = Message(TAG_JOIN, ss.str());
