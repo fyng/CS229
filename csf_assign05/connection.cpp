@@ -15,6 +15,7 @@ Connection::Connection(int fd)
   : m_fd(fd)
   , m_last_result(SUCCESS) {
   // TODO: call rio_readinitb to initialize the rio_t object
+  Rio_readinitb(&m_fdbuf, m_fd);
 }
 
 void Connection::connect(const std::string &hostname, int port) {
@@ -57,12 +58,11 @@ bool Connection::send(const Message &msg) {
   // TODO: send a message
   // return true if successful, false if not
   // make sure that m_last_result is set appropriately
-  int msg_len = msg.tag.length() + msg.data.length() + 1;
+  size_t msg_len = msg.tag.length() + msg.data.length() + 1;
   std::string send_msg;
   send_msg += msg.tag;
   send_msg += ":";
   send_msg += msg.data;
-  //send_msg << msg.tag << ":" << msg.data;
   ssize_t write_len = rio_writen(m_fd, &send_msg[0], msg_len);
 
   if (write_len == -1){
@@ -79,28 +79,22 @@ bool Connection::receive(Message &msg) {
   // make sure that m_last_result is set appropriately
 
   // First set read_buf as void* to receive message
-  void* read_buf = static_cast<void*>(new std::string); 
-  ssize_t read_len = Rio_readlineb(&m_fdbuf, read_buf, msg.MAX_LEN);
+  char read_buf[msg.MAX_LEN];
+  ssize_t read_len = rio_readlineb(&m_fdbuf, read_buf, msg.MAX_LEN);
   if (read_len == 0){
      m_last_result = EOF_OR_ERROR;
     return false;   
   }
-  // Convert the void* into a string object
-  std::string *read_buf_pt = static_cast<std::string*>(read_buf);
-  std::string read_buf_string = *read_buf_pt;
-  delete read_buf_pt;
 
-  // read_buf = trim(read_buf);
-  std::string delim = ":";
-  size_t found = read_buf_string.find(delim);
-  if (found == std::string::npos){
+  char * token = strtok(read_buf, ":");
+  if (token == NULL){
     // invalid message: no ":"
     m_last_result = INVALID_MSG;
     return false;
   }
-  msg.tag = read_buf_string.substr(0, found);
-  read_buf_string.erase(0, found + delim.length());
-  msg.data = read_buf_string;
+  msg.tag = std::string(token);
+  token = strtok(NULL, ":");
+  msg.data = std::string(token);
 
   m_last_result = SUCCESS;
   return true;
