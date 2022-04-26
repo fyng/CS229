@@ -63,11 +63,23 @@ Server::~Server() {
 bool Server::listen() {
   // TODO: use open_listenfd to create the server socket, return true
   //       if successful, false if not
+  int socket = open_listenfd(m_port);
+  if (socket <  0) {
+    return false;
+  } else {
+    m_ssock = socket;
+  }
+  return true;
 }
 
 void Server::handle_client_requests() {
   // TODO: infinite loop calling accept or Accept, starting a new
   //       pthread for each connected client
+  while (1) {
+    //wait_for_avail_proc();
+    int client_fd = Accept(m_ssock, NULL, NULL);
+
+  }
 }
 
 Room *Server::find_or_create_room(const std::string &room_name) {
