@@ -74,8 +74,8 @@ void *worker(void *arg) {
   //       receiver, communicate with the client (implementing
   //       separate helper functions for each of these possibilities
   //       is a good idea)
-  if (msg.tag == TAG_SLOGIN) info->server->chat_with_sender(info->conn, &msg);
-  else if (msg.tag == TAG_RLOGIN) info->server->chat_with_receiver(info->conn, &msg);
+  if (msg.tag == TAG_SLOGIN) info->server->chat_with_sender(info, username);
+  else if (msg.tag == TAG_RLOGIN) info->server->chat_with_receiver(info, username);
 
   return nullptr;
 }
@@ -157,52 +157,33 @@ Room *Server::find_or_create_room(const std::string &room_name) {
   return room;
 }
 
-void Server::chat_with_sender(Connection * conn, const Message * loginmsg){
+void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string &username){
   Message msg;
   Room * room = NULL;
 
   while (true) {
-    if (!conn->receive(msg)) {
-      if (conn->get_last_result() == Connection::INVALID_MSG) {
-        conn->send(Message(TAG_ERR, "invalid message"));
+    if (!info->conn->receive(msg)) {
+      if (info->conn->get_last_result() == Connection::INVALID_MSG) {
+        info->conn->send(Message(TAG_ERR, "invalid message"));
       }
       break;
     }
 
     if (msg.tag == TAG_QUIT) {
-      conn->send(Message(TAG_OK, "bye!"));
+      info->conn->send(Message(TAG_OK, "bye!"));
       break;
     }
     else if (msg.tag == TAG_JOIN) {
       room = find_or_create_room(msg.data);
-      conn->send(Message(TAG_OK, "Joined" + room->get_room_name()));
+      info->conn->send(Message(TAG_OK, "Joined" + room->get_room_name()));
     } else if (msg.tag == TAG_SENDALL) {
-      room->broadcast_message(loginmsg->data, msg.data);
-      conn->send(Message(TAG_OK, "message send"));
+      room->broadcast_message(username, msg.data);
+      info->conn->send(Message(TAG_OK, "message send"));
     } else if (msg.tag == TAG_LEAVE) {
       room = NULL;
-      conn->send(Message(TAG_OK, "left" + room->get_room_name()));
+      info->conn->send(Message(TAG_OK, "left" + room->get_room_name()));
     }
   }
 }
 
-void Server::chat_with_receiver(Connection * conn, const Message * loginmsg){
-  User user = {loginmsg->data};
-  Message msg;
-  Room * room = NULL;
-
-  while (true) {
-    if (!conn->receive(msg)) {
-      if (conn->get_last_result() == Connection::INVALID_MSG) {
-        conn->send(Message(TAG_ERR, "invalid message"));
-      }
-      break;
-    }
-
-    if (msg.tag == TAG_JOIN) {
-      room = find_or_create_room(msg.data);
-      room->add_member(&user);
-    }
-  }
-}
 
