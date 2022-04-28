@@ -17,6 +17,10 @@ public:
 
   Room *find_or_create_room(const std::string &room_name);
 
+  void chat_with_receiver(std::unique_ptr<ConnInfo> info, *User user);
+
+  void chat_with_sender(std::unique_ptr<ConnInfo> info, *User user);
+
 private:
   // prohibit value semantics
   Server(const Server &);
