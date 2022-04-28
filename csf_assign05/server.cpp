@@ -20,8 +20,8 @@
 // TODO: add any additional data types that might be helpful
 //       for implementing the Server member functions
 struct ConnInfo {
-  Server *server;
   Connection* conn; 
+  Server *server;
 
   ConnInfo(Connection *conn, Server *server) : conn(conn), server(server) { }
   ~ConnInfo() {
@@ -175,7 +175,7 @@ void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string
     }
     else if (msg.tag == TAG_JOIN) {
       room = find_or_create_room(msg.data);
-      info->conn->send(Message(TAG_OK, "Joined" + room->get_room_name()));
+      info->conn->send(Message(TAG_OK, "Joined " + room->get_room_name()));
     } else if (msg.tag == TAG_SENDALL) {
       room->broadcast_message(username, msg.data);
       info->conn->send(Message(TAG_OK, "message send"));
@@ -186,4 +186,23 @@ void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string
   }
 }
 
+void Server::chat_with_receiver(std::unique_ptr<ConnInfo> &info, const std::string &username){
+  User user = {username};
+  Message msg;
+  Room * room = NULL;
 
+  while (true) {
+    if (!info->conn->receive(msg)) {
+      if (info->conn->get_last_result() == Connection::INVALID_MSG) {
+        info->conn->send(Message(TAG_ERR, "invalid message"));
+      }
+      break;
+    }
+
+    if (msg.tag == TAG_JOIN) {
+      room = find_or_create_room(msg.data);
+      room->add_member(&user);
+      info->conn->send(Message(TAG_OK, "Joined " + room->get_room_name()));
+    }
+  }
+}

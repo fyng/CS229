@@ -36,7 +36,7 @@ void Room::broadcast_message(const std::string &sender_username, const std::stri
   Message msg = Message(TAG_DELIVERY, room_name + ":" + sender_username + ":" + message_text);
   pthread_mutex_lock(&lock);
   for (std::set<User *>::iterator it=members.begin(); it!=members.end(); ++it) {
-    it->enqueue(&msg);
+    (*it)->mqueue.enqueue(&msg);
   }
   pthread_mutex_unlock(&lock);
 }
