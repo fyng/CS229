@@ -20,8 +20,8 @@
 // TODO: add any additional data types that might be helpful
 //       for implementing the Server member functions
 struct ConnInfo {
-  int clientfd;
-  Connection conn; 
+  Server *server;
+  Connection* conn; 
 
   ConnInfo(Connection *conn, Server *server) : conn(conn), server(server) { }
   ~ConnInfo() {
@@ -114,7 +114,7 @@ bool Server::listen() {
   // TODO: use open_listenfd to create the server socket, return true
   //       if successful, false if not
   std::string port = std::to_string(m_port);
-  m_ssock = open_listenfd(m_port.c_str());
+  m_ssock = open_listenfd(port.c_str());
   return m_ssock >= 0;
 }
 
