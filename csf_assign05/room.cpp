@@ -33,6 +33,10 @@ void Room::remove_member(User *user) {
 
 void Room::broadcast_message(const std::string &sender_username, const std::string &message_text) {
   // TODO: send a message to every (receiver) User in the room
+  Message msg = Message(TAG_DELIVERY, room_name + ":" + sender_username + ":" + message_text);
   pthread_mutex_lock(&lock);
+  for (std::set<User *>::iterator it=members.begin(); it!=members.end(); ++it) {
+    it->enqueue(&msg);
+  }
   pthread_mutex_unlock(&lock);
 }
