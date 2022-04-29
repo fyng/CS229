@@ -1,6 +1,9 @@
 #include <cassert>
 #include <ctime>
 #include "message_queue.h"
+#include "guard.h"
+
+#include <iostream>
 
 MessageQueue::MessageQueue() {
   // TODO: initialize the mutex and the semaphore
@@ -16,9 +19,12 @@ MessageQueue::~MessageQueue() {
 
 void MessageQueue::enqueue(Message *msg) {
   // TODO: put the specified message on the queue
+  Guard g(m_lock);
+  m_messages.push_back(msg);
 
   // be sure to notify any thread waiting for a message to be
   // available by calling sem_post
+  sem_post(&m_avail);
 }
 
 Message *MessageQueue::dequeue() {
@@ -34,9 +40,15 @@ Message *MessageQueue::dequeue() {
   ts.tv_sec += 1;
 
   // TODO: call sem_timedwait to wait up to 1 second for a message
-  //       to be available, return nullptr if no message is available
-
+  //       to be available, return nullptr if no message is available  
   // TODO: remove the next message from the queue, return it
   Message *msg = nullptr;
+
+  int s = sem_timedwait(&m_avail, &ts);
+  if (s == 0) {
+    Guard g(m_lock);
+    msg = m_messages.front(); 
+    m_messages.pop_front();
+  }
   return msg;
 }

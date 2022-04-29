@@ -12,6 +12,7 @@
 #include "room.h"
 #include "guard.h"
 #include "server.h"
+#include "client_util.h"
 
 ////////////////////////////////////////////////////////////////////////
 // Server implementation data types
@@ -65,7 +66,9 @@ void *worker(void *arg) {
     return nullptr;
   }
 
-  std::string username = msg.data;
+  const std::string WHITESPACE = " \n\r\t\f\v";
+  size_t end = msg.data.find_last_not_of(WHITESPACE);
+  std::string username = (end == std::string::npos) ? "" : msg.data.substr(0, end + 1);
   if (!info->conn->send(Message(TAG_OK, "welcome " + username))) {
     return nullptr;
   }
@@ -142,7 +145,6 @@ Room *Server::find_or_create_room(const std::string &room_name) {
   // make sure the mutex is held while accessing the shared
   // data (the map of room names to room objects)
   Guard g(m_lock);
-
   Room *room;
 
   auto i = m_rooms.find(room_name);
@@ -157,9 +159,12 @@ Room *Server::find_or_create_room(const std::string &room_name) {
   return room;
 }
 
+const std::string WHITESPACE = " \n\r\t\f\v";
+
 void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string &username){
+
   Message msg;
-  Room * room = NULL;
+  Room *room;
 
   while (true) {
     if (!info->conn->receive(msg)) {
@@ -169,15 +174,18 @@ void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string
       break;
     }
 
+    size_t end = msg.data.find_last_not_of(WHITESPACE);
+    std::string msgdata = (end == std::string::npos) ? "" : msg.data.substr(0, end + 1);
+
     if (msg.tag == TAG_QUIT) {
       info->conn->send(Message(TAG_OK, "bye!"));
       break;
     }
     else if (msg.tag == TAG_JOIN) {
-      room = find_or_create_room(msg.data);
-      info->conn->send(Message(TAG_OK, "Joined " + room->get_room_name()));
+      room = find_or_create_room(msgdata);
+      info->conn->send(Message(TAG_OK, "joined " + room->get_room_name()));
     } else if (msg.tag == TAG_SENDALL) {
-      room->broadcast_message(username, msg.data);
+      room->broadcast_message(username, msgdata);
       info->conn->send(Message(TAG_OK, "message send"));
     } else if (msg.tag == TAG_LEAVE) {
       room = NULL;
@@ -187,9 +195,10 @@ void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string
 }
 
 void Server::chat_with_receiver(std::unique_ptr<ConnInfo> &info, const std::string &username){
-  User user = {username};
+  User *user = new User(username) ;
   Message msg;
-  Room * room = NULL;
+  Room *room;
+  
 
   while (true) {
     if (!info->conn->receive(msg)) {
@@ -200,9 +209,22 @@ void Server::chat_with_receiver(std::unique_ptr<ConnInfo> &info, const std::stri
     }
 
     if (msg.tag == TAG_JOIN) {
-      room = find_or_create_room(msg.data);
-      room->add_member(&user);
-      info->conn->send(Message(TAG_OK, "Joined " + room->get_room_name()));
+      size_t end = msg.data.find_last_not_of(WHITESPACE);
+      std::string rooname = (end == std::string::npos) ? "" : msg.data.substr(0, end + 1);
+
+      room = find_or_create_room(rooname);
+      room->add_member(user);
+      info->conn->send(Message(TAG_OK, "joined " + room->get_room_name()));
+
+      while (1) {
+        Message * delivery = user->mqueue.dequeue();
+        if (delivery != nullptr) {
+          bool success = info->conn->send(*delivery);
+          delete (delivery);
+          if (!success) break; 
+        }
+      }
     }
   }
-}
+  room->remove_member(user);
+} 
