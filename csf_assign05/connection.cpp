@@ -56,9 +56,9 @@ bool Connection::send(const Message &msg) {
   // TODO: send a message
   // return true if successful, false if not
   // make sure that m_last_result is set appropriately
-  size_t msg_len = msg.tag.length() + msg.data.length() + 1;
+  size_t msg_len = msg.tag.length() + msg.data.length() + 2;
   std::string send_msg;
-  send_msg = msg.tag + ":" + msg.data;
+  send_msg = msg.tag + ":" + msg.data + "\n";
   // send_msg += ":";
   // send_msg += msg.data;
   

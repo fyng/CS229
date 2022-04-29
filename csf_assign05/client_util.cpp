@@ -34,7 +34,6 @@ int Receive(Connection * link){
 }
 
 int Send(Connection * link, std::string tag, std::string data){
-  data += "\n";
   Message msg = Message(tag, data);
   if ((msg.tag.length() + msg.data.length() + 1) > msg.MAX_LEN){
     std::cerr << "Message exceeds max length" << std::endl;
