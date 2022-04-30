@@ -114,7 +114,7 @@ void Server::handle_client_requests() {
   // Create a thread for each accepted client connection, may use a struct pass connection object and other data to create the thread
   // Use worker() as the entry point for the thread
   // Create a User object in each client thread, perhaps make a room object to keep track of who is which server room
-  // Need a chat_with_sender() loop function and char_with_receiver() loop too
+  // Need a chat_with_sender() loop function and chat_with_receiver() loop too
   // Always send back with err or ok tag, do not send back to a receiver with the same login as the receiver
   // In client receiver loop, if quit or transmission fail, break loop and delete thread, don't forget memory leaks
   
@@ -132,8 +132,6 @@ void Server::handle_client_requests() {
       std::cerr << "could not create thread\n";
       return;
     }
-
-
   }
 }
 
@@ -144,16 +142,18 @@ Room *Server::find_or_create_room(const std::string &room_name) {
   // this function can be called from multiple threads, so
   // make sure the mutex is held while accessing the shared
   // data (the map of room names to room objects)
-  Guard g(m_lock);
   Room *room;
 
-  auto i = m_rooms.find(room_name);
-  if (i == m_rooms.end()) {
-    // room does not exist yet, so create it and add it to the map
-    room = new Room(room_name);
-    m_rooms[room_name] = room;
-  } else {
-    room = i->second;
+  {
+    Guard g(m_lock);
+    auto i = m_rooms.find(room_name);
+    if (i == m_rooms.end()) {
+      // room does not exist yet, so create it and add it to the map
+      room = new Room(room_name);
+      m_rooms[room_name] = room;
+    } else {
+      room = i->second;
+    }
   }
 
   return room;
@@ -185,11 +185,15 @@ void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string
       room = find_or_create_room(msgdata);
       info->conn->send(Message(TAG_OK, "joined " + room->get_room_name()));
     } else if (msg.tag == TAG_SENDALL) {
-      room->broadcast_message(username, msgdata);
-      info->conn->send(Message(TAG_OK, "message send"));
+      {
+	Guard g(m_lock);
+	room->broadcast_message(username, msgdata);
+	info->conn->send(Message(TAG_OK, "message send"));
+      }
     } else if (msg.tag == TAG_LEAVE) {
+      std::string left_room = room->get_room_name();
       room = NULL;
-      info->conn->send(Message(TAG_OK, "left" + room->get_room_name()));
+      info->conn->send(Message(TAG_OK, "left" + left_room));
     }
   }
 }
