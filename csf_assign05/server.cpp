@@ -160,7 +160,7 @@ Room *Server::find_or_create_room(const std::string &room_name) {
 
 void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string &username){
   Message msg;
-  Room *room;
+  Room *room = NULL;
   
   while (true) {
     if (!info->conn->receive(msg)) {
@@ -177,15 +177,19 @@ void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string
       room = find_or_create_room(rtrim(msg.data));
       info->conn->send(Message(TAG_OK, "joined " + room->get_room_name()));
     } else if (msg.tag == TAG_SENDALL) {
-      {
-        Guard g(m_lock);
-        room->broadcast_message(username, rtrim(msg.data));
-        info->conn->send(Message(TAG_OK, "message send"));
+      if (room != NULL) {
+	{
+	  Guard g(m_lock);
+	  room->broadcast_message(username, rtrim(msg.data));
+	  info->conn->send(Message(TAG_OK, "message send"));
+	}
       }
     } else if (msg.tag == TAG_LEAVE) {
-      std::string left_room = room->get_room_name();
-      room = NULL;
-      info->conn->send(Message(TAG_OK, "left" + left_room));
+      if (room != NULL) {
+	std::string left_room = room->get_room_name();
+	room = NULL;
+	info->conn->send(Message(TAG_OK, "left" + left_room));
+      }
     }
   }
 }
