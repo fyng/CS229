@@ -128,6 +128,7 @@ void Server::handle_client_requests() {
     pthread_t thread_id;
     if (pthread_create(&thread_id, NULL, worker, static_cast<void *>(info)) != 0) {
       std::cerr << "could not create thread\n";
+      delete info;
       return;
     }
   }
@@ -177,9 +178,9 @@ void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string
       info->conn->send(Message(TAG_OK, "joined " + room->get_room_name()));
     } else if (msg.tag == TAG_SENDALL) {
       {
-	Guard g(m_lock);
-	room->broadcast_message(username, rtrim(msg.data));
-	info->conn->send(Message(TAG_OK, "message send"));
+        Guard g(m_lock);
+        room->broadcast_message(username, rtrim(msg.data));
+        info->conn->send(Message(TAG_OK, "message send"));
       }
     } else if (msg.tag == TAG_LEAVE) {
       std::string left_room = room->get_room_name();
