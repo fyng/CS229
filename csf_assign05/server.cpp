@@ -66,9 +66,7 @@ void *worker(void *arg) {
     return nullptr;
   }
 
-  const std::string WHITESPACE = " \n\r\t\f\v";
-  size_t end = msg.data.find_last_not_of(WHITESPACE);
-  std::string username = (end == std::string::npos) ? "" : msg.data.substr(0, end + 1);
+  std::string username = rtrim(msg.data);
   if (!info->conn->send(Message(TAG_OK, "welcome " + username))) {
     return nullptr;
   }
@@ -159,13 +157,10 @@ Room *Server::find_or_create_room(const std::string &room_name) {
   return room;
 }
 
-const std::string WHITESPACE = " \n\r\t\f\v";
-
 void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string &username){
-
   Message msg;
   Room *room;
-
+  
   while (true) {
     if (!info->conn->receive(msg)) {
       if (info->conn->get_last_result() == Connection::INVALID_MSG) {
@@ -173,21 +168,17 @@ void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string
       }
       break;
     }
-
-    size_t end = msg.data.find_last_not_of(WHITESPACE);
-    std::string msgdata = (end == std::string::npos) ? "" : msg.data.substr(0, end + 1);
-
     if (msg.tag == TAG_QUIT) {
       info->conn->send(Message(TAG_OK, "bye!"));
       break;
     }
     else if (msg.tag == TAG_JOIN) {
-      room = find_or_create_room(msgdata);
+      room = find_or_create_room(rtrim(msg.data));
       info->conn->send(Message(TAG_OK, "joined " + room->get_room_name()));
     } else if (msg.tag == TAG_SENDALL) {
       {
 	Guard g(m_lock);
-	room->broadcast_message(username, msgdata);
+	room->broadcast_message(username, rtrim(msg.data));
 	info->conn->send(Message(TAG_OK, "message send"));
       }
     } else if (msg.tag == TAG_LEAVE) {
@@ -202,7 +193,6 @@ void Server::chat_with_receiver(std::unique_ptr<ConnInfo> &info, const std::stri
   User *user = new User(username) ;
   Message msg;
   Room *room;
-  
 
   while (true) {
     if (!info->conn->receive(msg)) {
@@ -213,10 +203,7 @@ void Server::chat_with_receiver(std::unique_ptr<ConnInfo> &info, const std::stri
     }
 
     if (msg.tag == TAG_JOIN) {
-      size_t end = msg.data.find_last_not_of(WHITESPACE);
-      std::string rooname = (end == std::string::npos) ? "" : msg.data.substr(0, end + 1);
-
-      room = find_or_create_room(rooname);
+      room = find_or_create_room(rtrim(msg.data));
       room->add_member(user);
       info->conn->send(Message(TAG_OK, "joined " + room->get_room_name()));
 

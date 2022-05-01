@@ -22,15 +22,14 @@ CXX_SENDER_OBJS = $(CXX_SENDER_SRCS:.cpp=.o)
 
 # Common C++ source/object files used by both server
 # and clients
-CXX_COMMON_SRCS = connection.cpp
+CXX_COMMON_SRCS = connection.cpp client_util.cpp
 CXX_COMMON_OBJS = $(CXX_COMMON_SRCS:.cpp=.o)
 
 # Common C++ source/object files used only by the clients
-CXX_CLIENT_SRCS = client_util.cpp
-CXX_CLIENT_OBJS = $(CXX_CLIENT_SRCS:.cpp=.o)
+# CXX_CLIENT_SRCS = client_util.cpp
+# CXX_CLIENT_OBJS = $(CXX_CLIENT_SRCS:.cpp=.o)
 
-CXX_SRCS = $(CXX_SERVER_SRCS) $(CXX_RECEIVER_SRCS) $(CXX_SENDER_SRCS) \
-	$(CXX_CLIENT_SRCS)
+CXX_SRCS = $(CXX_SERVER_SRCS) $(CXX_RECEIVER_SRCS) $(CXX_SENDER_SRCS)
 
 # C source/object file (this is also common to all executables)
 C_COMMON_SRCS = csapp.c
@@ -49,14 +48,14 @@ all : $(EXES)
 server : $(CXX_SERVER_OBJS) $(CXX_COMMON_OBJS) $(C_COMMON_OBJS)
 	$(CXX) -o $@ $(CXX_SERVER_OBJS) $(CXX_COMMON_OBJS) $(C_COMMON_OBJS) -lpthread
 
-sender : $(CXX_SENDER_OBJS) $(CXX_COMMON_OBJS) $(CXX_CLIENT_OBJS) $(C_COMMON_OBJS)
+sender : $(CXX_SENDER_OBJS) $(CXX_COMMON_OBJS) $(C_COMMON_OBJS)
 	$(CXX) -o $@ \
-		$(CXX_SENDER_OBJS) $(CXX_COMMON_OBJS) $(CXX_CLIENT_OBJS) $(C_COMMON_OBJS) \
+		$(CXX_SENDER_OBJS) $(CXX_COMMON_OBJS) $(C_COMMON_OBJS) \
 		-lpthread
 
-receiver : $(CXX_RECEIVER_OBJS) $(CXX_COMMON_OBJS) $(CXX_CLIENT_OBJS) $(C_COMMON_OBJS)
+receiver : $(CXX_RECEIVER_OBJS) $(CXX_COMMON_OBJS) $(C_COMMON_OBJS)
 	$(CXX) -o $@ \
-		$(CXX_RECEIVER_OBJS) $(CXX_COMMON_OBJS) $(CXX_CLIENT_OBJS) $(C_COMMON_OBJS) \
+		$(CXX_RECEIVER_OBJS) $(CXX_COMMON_OBJS) $(C_COMMON_OBJS) \
 		-lpthread
 
 .PHONY: solution.zip
