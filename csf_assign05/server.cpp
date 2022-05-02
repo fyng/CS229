@@ -57,7 +57,9 @@ void *worker(void *arg) {
   if (!info->conn->receive(msg)) {
     if (info->conn->get_last_result() == Connection::INVALID_MSG) {
       info->conn->send(Message(TAG_ERR, "invalid message"));
-    }
+    } else if (info->conn->get_last_result() == Connection::EOF_OR_ERROR) {
+      info->conn->send(Message(TAG_ERR, "EOF or error receiving message"));
+    } 
     return nullptr;
   }
 
@@ -164,31 +166,36 @@ void Server::chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string
   
   while (true) {
     if (!info->conn->receive(msg)) {
-      if (info->conn->get_last_result() == Connection::INVALID_MSG) {
+      if (info->conn->get_last_result()== Connection::INVALID_MSG) {
         info->conn->send(Message(TAG_ERR, "invalid message"));
+      } else if (info->conn->get_last_result()== Connection::EOF_OR_ERROR) {
+        info->conn->send(Message(TAG_ERR, "EOF or error receiving message"));
       }
-      break;
     }
+
     if (msg.tag == TAG_QUIT) {
       info->conn->send(Message(TAG_OK, "bye!"));
       break;
-    }
-    else if (msg.tag == TAG_JOIN) {
+    } else if (msg.tag == TAG_JOIN) {
       room = find_or_create_room(rtrim(msg.data));
       info->conn->send(Message(TAG_OK, "joined " + room->get_room_name()));
     } else if (msg.tag == TAG_SENDALL) {
       if (room != NULL) {
-	{
-	  Guard g(m_lock);
-	  room->broadcast_message(username, rtrim(msg.data));
-	  info->conn->send(Message(TAG_OK, "message send"));
-	}
+        {
+          Guard g(m_lock);
+          room->broadcast_message(username, rtrim(msg.data));
+          info->conn->send(Message(TAG_OK, "message send"));
+        }
+      } else {
+        info->conn->send(Message(TAG_ERR, "attempt to send message without joining a room"));
       }
     } else if (msg.tag == TAG_LEAVE) {
       if (room != NULL) {
-	std::string left_room = room->get_room_name();
-	room = NULL;
-	info->conn->send(Message(TAG_OK, "left" + left_room));
+        std::string left_room = room->get_room_name();
+        room = NULL;
+        info->conn->send(Message(TAG_OK, "left" + left_room));
+      } else{
+        info->conn->send(Message(TAG_ERR, "attempt to leave room without joining a room"));
       }
     }
   }
@@ -201,10 +208,11 @@ void Server::chat_with_receiver(std::unique_ptr<ConnInfo> &info, const std::stri
 
   while (true) {
     if (!info->conn->receive(msg)) {
-      if (info->conn->get_last_result() == Connection::INVALID_MSG) {
+      if (info->conn->get_last_result()== Connection::INVALID_MSG) {
         info->conn->send(Message(TAG_ERR, "invalid message"));
+      } else if (info->conn->get_last_result()== Connection::EOF_OR_ERROR) {
+        info->conn->send(Message(TAG_ERR, "EOF or error receiving message"));
       }
-      break;
     }
 
     if (msg.tag == TAG_JOIN) {
@@ -224,3 +232,4 @@ void Server::chat_with_receiver(std::unique_ptr<ConnInfo> &info, const std::stri
   }
   room->remove_member(user);
 } 
+

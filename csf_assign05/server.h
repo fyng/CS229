@@ -22,7 +22,6 @@ public:
   void chat_with_receiver(std::unique_ptr<ConnInfo> &info, const std::string &username);
 
   void chat_with_sender(std::unique_ptr<ConnInfo> &info, const std::string &username);
-
 private:
   // prohibit value semantics
   Server(const Server &);
