@@ -83,9 +83,16 @@ bool Connection::receive(Message &msg) {
   if (read_len > 0){
     std::string buf = std::string(read_buf);
     size_t delim = buf.find(":");
+    if (delim == std::string::npos) {
+      m_last_result = INVALID_MSG;
+      return false;
+    }
     msg.tag = buf.substr(0, delim);
     msg.data = buf.substr(delim+1, std::string::npos);
-
+    if ((msg.tag.length() + msg.data.length()) > msg.MAX_LEN) {
+      m_last_result = INVALID_MSG;
+      return false;
+    }
     m_last_result = SUCCESS;
     return true;     
   }
